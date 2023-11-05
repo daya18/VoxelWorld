@@ -3,14 +3,10 @@
 namespace vw
 {
 	Application::Application ()
+	: 
+		window { "Voxel World", { 1280, 720 } },
+		renderer ( window )
 	{
-		glfwInit ();
-		window = Window { "Voxel World", { 1280, 720 } };
-	}
-
-	Application::~Application ()
-	{
-		glfwTerminate ();
 	}
 
 	void Application::Run ()
@@ -26,7 +22,7 @@ namespace vw
 			}
 
 			window.MakeGLContextCurrent ();
-			glClear ( GL_COLOR_BUFFER_BIT );
+			renderer.Render ();
 			window.SwapBuffers ();
 		}
 	}

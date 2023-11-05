@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Window.hpp"
+#include "Renderer.hpp"
 
 namespace vw
 {
@@ -10,7 +11,6 @@ namespace vw
 		Application ();
 		Application ( Application const & ) = delete;
 		Application ( Application && ) = delete;
-		~Application ();
 
 		Application & operator = ( Application const & ) = delete;
 		Application & operator = ( Application && ) = delete;
@@ -20,5 +20,6 @@ namespace vw
 	private:
 		bool quit { false };
 		Window window;
+		Renderer renderer;
 	};
 }

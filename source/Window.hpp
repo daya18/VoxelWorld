@@ -5,7 +5,6 @@ namespace vw
 	class Window
 	{
 	public:
-		Window ();
 		Window ( std::string const & title, glm::uvec2 const & size );
 		Window ( Window const & ) = delete;
 		Window ( Window && ) noexcept;
@@ -20,6 +19,7 @@ namespace vw
 		void SwapBuffers () const;
 
 	private:
+		static int instanceCount;
 		GLFWwindow * window { nullptr };
 	};
 

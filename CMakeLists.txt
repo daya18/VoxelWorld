@@ -24,10 +24,20 @@ add_subdirectory ( external/glm )
 
 add_executable ( VoxelWorld )
 
+set_source_files_properties ( external/glad/src/glad.c PROPERTIES LANGUAGE CXX)
+
 target_sources ( VoxelWorld PRIVATE 
+	external/glad/src/glad.c
+	
 	"source/Main.cpp"		
 	"source/Window.cpp"
- "source/Application.cpp")
+	"source/Application.cpp" 
+	"source/VoxelRenderer.cpp"
+ "source/Renderer.cpp")
+
+target_include_directories ( VoxelWorld PRIVATE 
+	external/glad/include
+)
 
 target_precompile_headers ( VoxelWorld PRIVATE source/vwpch.hpp )
 

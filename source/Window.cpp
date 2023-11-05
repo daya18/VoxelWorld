@@ -2,11 +2,15 @@
 
 namespace vw
 {
-	Window::Window () {}
+	int Window::instanceCount { 0 };
 
 	Window::Window ( std::string const & title, glm::uvec2 const & size )
-		: window ( glfwCreateWindow ( size.x, size.y, title.data (), nullptr, nullptr ) )
 	{
+		if ( instanceCount == 0 )
+			glfwInit ();
+
+		window = glfwCreateWindow ( size.x, size.y, title.data (), nullptr, nullptr );
+		++instanceCount;
 	}
 
 	Window::Window ( Window && r ) noexcept
@@ -18,6 +22,11 @@ namespace vw
 	{
 		if ( window )
 			glfwDestroyWindow ( window );
+		
+		--instanceCount;
+
+		if ( instanceCount == 0 )
+			glfwTerminate ();
 	}
 
 	Window & Window::operator = ( Window && r ) noexcept
