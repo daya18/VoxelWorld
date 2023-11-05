@@ -23,7 +23,7 @@ namespace vw
 
 	private:
 		void CreateGeometryBuffers ();
-		GLuint CreateShader ();
+		GLuint CreateShader ( std::string const & filePath, GLenum type );
 		void CreateShaderProgram ();
 		void CreateVertexArray ();
 

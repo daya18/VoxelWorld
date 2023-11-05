@@ -8,7 +8,8 @@ namespace vw
 	{
 		if ( instanceCount == 0 )
 			glfwInit ();
-
+		
+		glfwWindowHint ( GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE );
 		window = glfwCreateWindow ( size.x, size.y, title.data (), nullptr, nullptr );
 		++instanceCount;
 	}
