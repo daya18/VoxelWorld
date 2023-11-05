@@ -10,14 +10,30 @@ project ("VoxelWorld")
 
 include ("FindOpenGL")
 
+# Link all external dependencies statically
+set ( BUILD_SHARED_LIBS OFF )
+
+# Add GLFW
+set ( GLFW_BUILD_DOCS OFF )
+set ( GLFW_BUILD_EXAMPLES OFF )
+set ( GLFW_BUILD_TESTS OFF )
+add_subdirectory ( external/glfw )
+
+# Add GLM
+add_subdirectory ( external/glm )
+
 add_executable ( VoxelWorld )
 
 target_sources ( VoxelWorld PRIVATE 
-	"VoxelWorld.cpp"	
-	"VoxelWorld.h"
-)
+	"source/Main.cpp"		
+	"source/Window.cpp"
+ "source/Application.cpp")
+
+target_precompile_headers ( VoxelWorld PRIVATE source/vwpch.hpp )
 
 target_link_libraries ( VoxelWorld PRIVATE 
+	glfw
+	glm
 	OpenGL::GL
 )
 
