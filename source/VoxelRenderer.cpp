@@ -66,21 +66,60 @@ namespace vw
 	{
 		glUseProgram ( shaderProgram );
 		glBindVertexArray ( vertexArray );
-		glDrawArrays ( GL_TRIANGLES, 0, 3 );
+		glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
+		glDrawElements ( GL_TRIANGLES, 6 * 6, GL_UNSIGNED_INT, nullptr );
 	}
 
 	void VoxelRenderer::CreateGeometryBuffers ()
 	{
 		std::vector <GLfloat> vertices
 		{
-			-1, -1, 0,
-			0, 1, 0,
-			1, -1, 0
+			//	| POSITION | | NORMAL |
+	// Near
+	 -1, -1,  1,
+	 -1,  1,  1,
+	  1,  1,  1,
+	  1, -1,  1,
+
+	  // Far
+	  -1, -1, -1,
+	  -1,  1, -1,
+	   1,  1, -1,
+	   1, -1, -1,
+
+	   // Left
+	   -1, -1, -1,
+	   -1,  1, -1,
+	   -1,  1,  1,
+	   -1, -1,  1,
+
+	   // Right
+		 1, -1, -1,
+		 1,  1, -1,
+		 1,  1,  1,
+		 1, -1,  1,
+
+		 // Up
+		 -1,  1, -1,
+		 -1,  1,  1,
+		  1,  1,  1,
+		  1,  1, -1,
+
+		  // Down
+		 -1, -1, -1,
+		 -1, -1,  1,
+		  1, -1,  1,
+		  1, -1, -1,
 		};
 
 		std::vector <GLuint> indices
 		{
-			0, 1, 2
+			0, 1, 2, 2, 3, 0,
+			4, 5, 6, 6, 7, 4,
+			8, 9, 10, 10, 11, 8,
+			12, 13, 14, 14, 15, 12,
+			16, 17, 18, 18, 19, 16,
+			20, 21, 22, 22, 23, 20
 		};
 
 		glGenBuffers ( 1, &vertexBuffer );
