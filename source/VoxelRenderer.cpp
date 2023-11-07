@@ -1,5 +1,7 @@
 #include "VoxelRenderer.hpp"
 
+#include "Camera.hpp"
+
 namespace vw
 {
 	VoxelRenderer::VoxelRenderer ()
@@ -12,6 +14,9 @@ namespace vw
 		glBindVertexBuffer ( 0, vertexBuffer, 0, sizeof ( GLfloat ) * 3 );
 		
 		CreateShaderProgram ();
+
+		viewMatrixUniformLocation = glGetUniformLocation ( shaderProgram, "u_viewMatrix" );
+		projectionMatrixUniformLocation = glGetUniformLocation ( shaderProgram, "u_projectionMatrix" );
 	}
 
 	VoxelRenderer::VoxelRenderer ( VoxelRenderer && r )
@@ -30,6 +35,18 @@ namespace vw
 		}
 	}
 
+	void VoxelRenderer::SetView ( glm::mat4 const & viewMatrix )
+	{
+		glUseProgram ( shaderProgram );
+		glUniformMatrix4fv ( viewMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr ( viewMatrix ) );
+	}
+
+	void VoxelRenderer::SetProjection ( glm::mat4 const & projectionMatrix )
+	{
+		glUseProgram ( shaderProgram );
+		glUniformMatrix4fv ( projectionMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr ( projectionMatrix ) );
+	}
+
 	VoxelRenderer & VoxelRenderer::operator = ( VoxelRenderer && r )
 	{
 		destroyResources = std::exchange ( r.destroyResources, false );
@@ -40,6 +57,14 @@ namespace vw
 		shaderProgram = r.shaderProgram;
 
 		return *this;
+	}
+
+	void VoxelRenderer::SetCamera ( Camera & camera )
+	{
+		camera.AddSignalListener ( "ViewUpdate", [this, &camera] () { SetView ( camera.GetViewMatrix () ); } );
+		camera.AddSignalListener ( "ProjectionUpdate", [this, &camera] () { SetProjection ( camera.GetProjectionMatrix () ); } );
+		SetView ( camera.GetViewMatrix () );
+		SetProjection ( camera.GetProjectionMatrix () );
 	}
 
 	void VoxelRenderer::AddVoxelType ( std::string const & name, std::string const & textureFilePath )

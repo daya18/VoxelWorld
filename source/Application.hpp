@@ -2,6 +2,7 @@
 
 #include "Window.hpp"
 #include "Renderer.hpp"
+#include "World.hpp"
 
 namespace vw
 {
@@ -21,5 +22,7 @@ namespace vw
 		bool quit { false };
 		Window window;
 		Renderer renderer;
+		glm::mat4 projectionMatrix;
+		World world;
 	};
 }

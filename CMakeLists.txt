@@ -33,7 +33,7 @@ target_sources ( VoxelWorld PRIVATE
 	"source/Window.cpp"
 	"source/Application.cpp" 
 	"source/VoxelRenderer.cpp"
- "source/Renderer.cpp")
+ "source/Renderer.cpp" "source/World.cpp" "source/SignalEmitter.cpp" "source/Camera.cpp")
 
 target_include_directories ( VoxelWorld PRIVATE 
 	external/glad/include

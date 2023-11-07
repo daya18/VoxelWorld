@@ -17,6 +17,11 @@ namespace vw
 		voxelRenderer = std::make_unique <VoxelRenderer> ();
 	}
 
+	void Renderer::SetCamera ( Camera & camera )
+	{
+		voxelRenderer->SetCamera ( camera );
+	}
+
 	void Renderer::Render ()
 	{
 		glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );

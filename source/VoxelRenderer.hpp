@@ -2,6 +2,8 @@
 
 namespace vw
 {
+	class Camera;
+
 	class VoxelRenderer
 	{
 	public:
@@ -16,12 +18,17 @@ namespace vw
 		void AddVoxelType ( std::string const & name, std::string const & textureFilePath );
 		void DeleteVoxelType ( std::string const & name );
 
+		void SetCamera ( Camera & );
+
 		void AddVoxel ( glm::vec3 const & position, std::string const & type );
 		void DeleteVoxel ( glm::vec3 const & position );
 
 		void Render ();
 
 	private:
+		void SetView ( glm::mat4 const & );
+		void SetProjection ( glm::mat4 const & );
+
 		void CreateGeometryBuffers ();
 		GLuint CreateShader ( std::string const & filePath, GLenum type );
 		void CreateShaderProgram ();
@@ -33,5 +40,7 @@ namespace vw
 		GLuint shaderProgram;
 		GLuint vertexArray;
 		std::vector <GLuint> voxelTypeTextures;
+		GLuint viewMatrixUniformLocation;
+		GLuint projectionMatrixUniformLocation;
 	};
 }

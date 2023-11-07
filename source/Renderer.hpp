@@ -5,12 +5,15 @@
 namespace vw
 {
 	class Window;
+	class Camera;
 
 	class Renderer
 	{
 	public:
 		Renderer ( Window & window );
 		
+		void SetCamera ( Camera & camera );
+
 		void Render ();
 
 	private:
