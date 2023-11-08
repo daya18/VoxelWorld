@@ -4,20 +4,24 @@
 
 namespace vw
 {
-	float Camera::moveSensitivity { 0.01f };
+	float Camera::moveSensitivity { 0.02f };
+	float Camera::rotateSensitivity { 0.08f };
 
 	Camera::Camera ( Window & window )
 	:
 		window ( & window ),
-		position ( 0.0f, 0.0f, -10.0f ),
-		lookDirection ( 0.0f, 0.0f, 1.0f )
+		position ( 0.0f, 0.0f, 10.0f ),
+		lookDirection ( 0.0f, 0.0f, -1.0f )
 	{
 		UpdateViewMatrix ();
 		UpdateProjectionMatrix ();
+
+		//window.AddSignalListener ( "MouseMove", [] () {std::cout << "BOBOPP" << std::endl; } );
 	}
 
 	void Camera::Update ( float deltaTime )
 	{
+		// Handle Move
 		if ( window->GetKey ( GLFW_KEY_D ) == GLFW_PRESS )
 			Move ( GetRight () * moveSensitivity );
 			
@@ -36,12 +40,23 @@ namespace vw
 		if ( window->GetKey ( GLFW_KEY_LEFT_SHIFT ) == GLFW_PRESS )
 			Move ( glm::vec3 { 0.0f, -1.0f, 0.0f } * moveSensitivity );
 
+		// Handle rotation
+		Rotate ( { 0.0f, 1.0f, 0.0f }, -window->GetMouseDelta ().x * rotateSensitivity );
+		Rotate ( { 1.0f, 0.0f, 0.0f }, -window->GetMouseDelta ().y * rotateSensitivity );
+		
+		UpdateViewMatrix ();
+	}
+
+	void Camera::Rotate ( glm::vec3 normal, float angle )
+	{
+		lookDirection = glm::rotate ( lookDirection, glm::radians ( angle ), normal );
+		//UpdateViewMatrix ();
 	}
 
 	void Camera::Move ( glm::vec3 const & delta )
 	{
 		position += delta;
-		UpdateViewMatrix ();
+		//UpdateViewMatrix ();
 	}
 
 	void Camera::UpdateViewMatrix ()

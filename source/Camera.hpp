@@ -18,6 +18,9 @@ namespace vw
 
 	private:
 		static float moveSensitivity;
+		static float rotateSensitivity;
+
+		void Rotate ( glm::vec3 normal, float angle );
 		void Move ( glm::vec3 const & );
 		void HandleKeyPress ( int key );
 		void HandleKeyRelease ( int key );

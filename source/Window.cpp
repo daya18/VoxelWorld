@@ -8,13 +8,16 @@ namespace vw
 	{
 		if ( instanceCount == 0 )
 			glfwInit ();
-		
+
 		glfwWindowHint ( GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE );
 		window = glfwCreateWindow ( size.x, size.y, title.data (), nullptr, nullptr );
 		glfwSetWindowUserPointer ( window, this );
+		
+		glfwSetCursorEnterCallback ( window, mouseEnterCallback );
 		glfwSetCursorPosCallback ( window, mouseMoveCallback );
 		glfwSetFramebufferSizeCallback ( window, framebufferResizeCallback );
 		glfwSetKeyCallback ( window, keyCallback );
+
 		++instanceCount;
 	}
 
@@ -27,7 +30,7 @@ namespace vw
 	{
 		if ( window )
 			glfwDestroyWindow ( window );
-		
+
 		--instanceCount;
 
 		if ( instanceCount == 0 )
@@ -47,7 +50,7 @@ namespace vw
 		glfwGetFramebufferSize ( window, &width, &height );
 		return { static_cast < unsigned int > ( width ), static_cast < unsigned int > ( height ) };
 	}
-	
+
 	Window * Window::GetWindow ( GLFWwindow * glfwWindow )
 	{
 		return reinterpret_cast < Window * > ( glfwGetWindowUserPointer ( glfwWindow ) );
@@ -55,7 +58,6 @@ namespace vw
 
 	void Window::mouseMoveCallback ( GLFWwindow * glfwWindow, double xpos, double ypos )
 	{
-		GetWindow(glfwWindow)->EmitSignal ("MouseMove");
 	}
 
 	void Window::framebufferResizeCallback ( GLFWwindow * glfwWindow, int width, int height )
@@ -73,8 +75,46 @@ namespace vw
 			GetWindow ( glfwWindow )->EmitSignal ( "KeyRelease" );
 	}
 
+	void Window::mouseEnterCallback ( GLFWwindow * glfwWindow, int entered )
+	{
+		if ( entered )
+		{
+			double x, y;
+			glfwGetCursorPos ( glfwWindow, &x, &y );
+			GetWindow ( glfwWindow )->lastKnownMousePosition = glm::vec2 { x, y };
+		}
+	}
+
 	bool Window::GetKey ( int key )
 	{
 		return glfwGetKey ( window, key );
 	}
+	
+	void Window::HandleInput ()
+	{
+		double x, y;
+		glfwGetCursorPos ( window, &x, &y );
+		glm::vec2 currentMousePosition { x, y };
+		mouseDelta = currentMousePosition - lastKnownMousePosition;
+		lastKnownMousePosition = currentMousePosition;
+	}
+
+	void Window::EnableRawMouseInput ()
+	{
+		if ( glfwRawMouseMotionSupported () )
+		{
+			glfwSetInputMode ( window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
+			glfwSetInputMode ( window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE );
+		}
+	}
+
+	void Window::DisableRawMouseInput ()
+	{
+		if ( glfwRawMouseMotionSupported () )
+		{
+			glfwSetInputMode ( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
+			glfwSetInputMode ( window, GLFW_RAW_MOUSE_MOTION, GLFW_FALSE );
+		}
+	}
+
 }

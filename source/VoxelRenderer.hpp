@@ -40,6 +40,7 @@ namespace vw
 		GLuint shaderProgram;
 		GLuint vertexArray;
 		std::vector <GLuint> voxelTypeTextures;
+		GLuint modelMatrixUniformLocation;
 		GLuint viewMatrixUniformLocation;
 		GLuint projectionMatrixUniformLocation;
 	};

@@ -15,6 +15,7 @@ namespace vw
 		
 		CreateShaderProgram ();
 
+		modelMatrixUniformLocation = glGetUniformLocation ( shaderProgram, "u_modelMatrix" );
 		viewMatrixUniformLocation = glGetUniformLocation ( shaderProgram, "u_viewMatrix" );
 		projectionMatrixUniformLocation = glGetUniformLocation ( shaderProgram, "u_projectionMatrix" );
 	}
@@ -90,6 +91,7 @@ namespace vw
 	void VoxelRenderer::Render ()
 	{
 		glUseProgram ( shaderProgram );
+		glUniformMatrix4fv ( modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr ( glm::translate ( glm::identity <glm::mat4> (), { 5.0f, 0.0f, 0.0f } ) ) );
 		glBindVertexArray ( vertexArray );
 		glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
 		glDrawElements ( GL_TRIANGLES, 6 * 6, GL_UNSIGNED_INT, nullptr );

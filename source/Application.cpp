@@ -12,6 +12,7 @@ namespace vw
 
 		world ( window, renderer )
 	{
+		window.EnableRawMouseInput ();
 	}
 
 	void Application::Run ()
@@ -25,6 +26,8 @@ namespace vw
 				quit = true;
 				break;
 			}
+
+			window.HandleInput ();
 
 			world.Update ( 1.0f );
 

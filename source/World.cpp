@@ -11,6 +11,7 @@ namespace vw
 		camera ( window )
 	{
 		renderer.SetCamera ( camera );
+
 	}
 
 	void World::Update ( float deltaTime )
