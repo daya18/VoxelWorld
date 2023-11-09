@@ -39,8 +39,8 @@ namespace vw
 		static int instanceCount;
 		GLFWwindow * window { nullptr };
 		int lastKey;
-		glm::vec2 lastKnownMousePosition {};
-		glm::vec2 mouseDelta {};
+		glm::vec2 lastKnownMousePosition { std::numeric_limits <float>::max (), std::numeric_limits <float>::max () };
+		glm::vec2 mouseDelta { 0.0f, 0.0f };
 	};
 
 	// Implementation

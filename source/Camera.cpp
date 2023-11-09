@@ -42,7 +42,7 @@ namespace vw
 
 		// Handle rotation
 		Rotate ( { 0.0f, 1.0f, 0.0f }, -window->GetMouseDelta ().x * rotateSensitivity );
-		Rotate ( { 1.0f, 0.0f, 0.0f }, -window->GetMouseDelta ().y * rotateSensitivity );
+		Rotate ( GetRight (), -window->GetMouseDelta ().y * rotateSensitivity);
 		
 		UpdateViewMatrix ();
 	}

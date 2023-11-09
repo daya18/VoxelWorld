@@ -2,6 +2,11 @@
 
 #include "Camera.hpp"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+#include "OBJ_Loader.h"
+
 namespace vw
 {
 	VoxelRenderer::VoxelRenderer ()
@@ -11,13 +16,14 @@ namespace vw
 		CreateVertexArray ();
 
 		glBindVertexArray ( vertexArray );
-		glBindVertexBuffer ( 0, vertexBuffer, 0, sizeof ( GLfloat ) * 3 );
+		glBindVertexBuffer ( 0, vertexBuffer, 0, sizeof ( GLfloat ) * ( 3 + 2 ) );
 		
 		CreateShaderProgram ();
 
-		modelMatrixUniformLocation = glGetUniformLocation ( shaderProgram, "u_modelMatrix" );
+		modelMatricesUniformLocation = glGetUniformLocation ( shaderProgram, "u_modelMatrices" );
 		viewMatrixUniformLocation = glGetUniformLocation ( shaderProgram, "u_viewMatrix" );
 		projectionMatrixUniformLocation = glGetUniformLocation ( shaderProgram, "u_projectionMatrix" );
+		colorUniformLocation = glGetUniformLocation ( shaderProgram, "u_color" );
 	}
 
 	VoxelRenderer::VoxelRenderer ( VoxelRenderer && r )
@@ -68,95 +74,114 @@ namespace vw
 		SetProjection ( camera.GetProjectionMatrix () );
 	}
 
-	void VoxelRenderer::AddVoxelType ( std::string const & name, std::string const & textureFilePath )
+	void VoxelRenderer::AddVoxelType ( std::string const & name, std::string const & texturePath )
 	{
+		GLuint texture;
+		
+		{
+			assert ( std::filesystem::exists ( texturePath ) );
 
+			stbi_set_flip_vertically_on_load ( 1 );
+
+			int width, height;
+			auto data { stbi_load ( texturePath.data (), &width, &height, nullptr, STBI_rgb_alpha ) };
+		
+			glGenTextures ( 1, &texture );
+			glBindTexture ( GL_TEXTURE_2D, texture );
+			glTexImage2D ( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
+			glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+			glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+			glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+			glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+			glBindTexture ( GL_TEXTURE_2D, 0 );
+		}
+
+		batches.insert ( { name, Batch { texture } } );
 	}
 
 	void VoxelRenderer::DeleteVoxelType ( std::string const & name )
 	{
-
+		batches.erase ( name );
 	}
 
-	void VoxelRenderer::AddVoxel ( glm::vec3 const & position, std::string const & type )
+	void VoxelRenderer::AddVoxel ( glm::vec3 const & position, std::string const & type, glm::mat4 rotation )
 	{
+		auto batchIt { batches.find ( type ) };
 
+		assert ( batchIt != batches.end () );
+
+		glm::mat4 translation { glm::translate ( glm::identity <glm::mat4> (), position ) };
+		
+		batchIt->second.voxelTransforms.push_back ( translation );
 	}
 
 	void VoxelRenderer::DeleteVoxel ( glm::vec3 const & position )
 	{
+		//auto locationIt { voxelLocations.find ( position ) };
 
+		//assert ( locationIt != voxelLocations.end () );
+
+		//std::batches [ locationIt->second.batchName ].voxelTransforms;
+		//
+		//[locationIt->second.voxelIndex] ;
+		//std::erase ( locationIt->second.voxelTransforms.begin () ;
+	
 	}
 
 	void VoxelRenderer::Render ()
 	{
 		glUseProgram ( shaderProgram );
-		glUniformMatrix4fv ( modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr ( glm::translate ( glm::identity <glm::mat4> (), { 5.0f, 0.0f, 0.0f } ) ) );
 		glBindVertexArray ( vertexArray );
 		glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
-		glDrawElements ( GL_TRIANGLES, 6 * 6, GL_UNSIGNED_INT, nullptr );
+
+		for ( auto const & [name, batch] : batches )
+		{
+			glActiveTexture ( GL_TEXTURE0 );
+			glBindTexture ( GL_TEXTURE_2D, batch.texture );
+
+			glUniform1i ( glGetUniformLocation ( shaderProgram, "u_texture" ), 0 );
+
+			glUniformMatrix4fv ( 
+				modelMatricesUniformLocation,
+				batch.voxelTransforms.size (), 
+				GL_FALSE, 
+				glm::value_ptr ( batch.voxelTransforms.front () )
+			);
+
+			glDrawElementsInstanced ( GL_TRIANGLES, 6 * 6, GL_UNSIGNED_INT, nullptr, batch.voxelTransforms.size () );
+		}
 	}
 
 	void VoxelRenderer::CreateGeometryBuffers ()
 	{
-		std::vector <GLfloat> vertices
+		std::vector <GLfloat> vertices;
+		std::vector <GLuint> indices;
+
+		objl::Loader loader;
+		loader.LoadFile ( "model/Voxel.obj" );
+
+		auto mesh { loader.LoadedMeshes.front () };
+
+		for ( auto const & vertex : mesh.Vertices )
 		{
-			//	| POSITION | | NORMAL |
-	// Near
-	 -1, -1,  1,
-	 -1,  1,  1,
-	  1,  1,  1,
-	  1, -1,  1,
+			vertices.push_back ( vertex.Position.X );
+			vertices.push_back ( vertex.Position.Y );
+			vertices.push_back ( vertex.Position.Z );
 
-	  // Far
-	  -1, -1, -1,
-	  -1,  1, -1,
-	   1,  1, -1,
-	   1, -1, -1,
+			vertices.push_back ( vertex.TextureCoordinate.X );
+			vertices.push_back ( vertex.TextureCoordinate.Y );
+		}
 
-	   // Left
-	   -1, -1, -1,
-	   -1,  1, -1,
-	   -1,  1,  1,
-	   -1, -1,  1,
-
-	   // Right
-		 1, -1, -1,
-		 1,  1, -1,
-		 1,  1,  1,
-		 1, -1,  1,
-
-		 // Up
-		 -1,  1, -1,
-		 -1,  1,  1,
-		  1,  1,  1,
-		  1,  1, -1,
-
-		  // Down
-		 -1, -1, -1,
-		 -1, -1,  1,
-		  1, -1,  1,
-		  1, -1, -1,
-		};
-
-		std::vector <GLuint> indices
-		{
-			0, 1, 2, 2, 3, 0,
-			4, 5, 6, 6, 7, 4,
-			8, 9, 10, 10, 11, 8,
-			12, 13, 14, 14, 15, 12,
-			16, 17, 18, 18, 19, 16,
-			20, 21, 22, 22, 23, 20
-		};
+		for ( auto const & index : mesh.Indices )
+			indices.push_back ( index );
 
 		glGenBuffers ( 1, &vertexBuffer );
 		glBindBuffer ( GL_ARRAY_BUFFER, vertexBuffer );
-		glBufferData ( GL_ARRAY_BUFFER, vertices.size () * sizeof ( GLfloat ), vertices.data (), GL_STATIC_DRAW );
+		glBufferData ( GL_ARRAY_BUFFER, vertices.size () * sizeof (GLfloat), vertices.data (), GL_STATIC_DRAW);
 
 		glGenBuffers ( 1, &indexBuffer );
 		glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
-		glBufferData ( GL_ELEMENT_ARRAY_BUFFER, indices.size () * sizeof ( GLuint ), indices.data (), GL_STATIC_DRAW );
-
+		glBufferData ( GL_ELEMENT_ARRAY_BUFFER, indices.size () * sizeof (GLuint), indices.data (), GL_STATIC_DRAW);
 	}
 
 	GLuint VoxelRenderer::CreateShader ( std::string const & filePath, GLenum type )
@@ -191,7 +216,13 @@ namespace vw
 	{
 		glGenVertexArrays ( 1, &vertexArray );
 		glBindVertexArray ( vertexArray );
+		
 		glEnableVertexAttribArray ( 0 );
 		glVertexAttribFormat ( 0, 3, GL_FLOAT, GL_FALSE, 0 );
+		glVertexAttribBinding ( 0, 0 );
+
+		glEnableVertexAttribArray ( 1 );
+		glVertexAttribFormat ( 1, 2, GL_FLOAT, GL_FALSE, sizeof ( GLfloat ) * 3 );
+		glVertexAttribBinding ( 1, 0 );
 	}
 }

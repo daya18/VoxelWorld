@@ -77,12 +77,14 @@ namespace vw
 
 	void Window::mouseEnterCallback ( GLFWwindow * glfwWindow, int entered )
 	{
-		if ( entered )
+	/*	if ( entered )
 		{
 			double x, y;
 			glfwGetCursorPos ( glfwWindow, &x, &y );
 			GetWindow ( glfwWindow )->lastKnownMousePosition = glm::vec2 { x, y };
+			GetWindow ( glfwWindow )->mouseDelta = { 0.0f, 0.0f };
 		}
+	*/
 	}
 
 	bool Window::GetKey ( int key )
@@ -95,7 +97,10 @@ namespace vw
 		double x, y;
 		glfwGetCursorPos ( window, &x, &y );
 		glm::vec2 currentMousePosition { x, y };
-		mouseDelta = currentMousePosition - lastKnownMousePosition;
+		
+		if ( lastKnownMousePosition != glm::vec2 { std::numeric_limits <float>::max (), std::numeric_limits <float>::max () } )
+			mouseDelta = currentMousePosition - lastKnownMousePosition;
+		
 		lastKnownMousePosition = currentMousePosition;
 	}
 

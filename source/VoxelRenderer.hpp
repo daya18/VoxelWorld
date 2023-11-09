@@ -15,17 +15,29 @@ namespace vw
 		VoxelRenderer & operator = ( VoxelRenderer const & ) = delete;
 		VoxelRenderer & operator = ( VoxelRenderer && );
 
-		void AddVoxelType ( std::string const & name, std::string const & textureFilePath );
+		void AddVoxelType ( std::string const & name, std::string const & texturePath );
 		void DeleteVoxelType ( std::string const & name );
 
 		void SetCamera ( Camera & );
 
-		void AddVoxel ( glm::vec3 const & position, std::string const & type );
+		void AddVoxel ( glm::vec3 const & position, std::string const & type, glm::mat4 rotation = glm::identity <glm::mat4> () );
 		void DeleteVoxel ( glm::vec3 const & position );
 
 		void Render ();
 
 	private:
+		struct Batch
+		{
+			GLuint texture;
+			std::vector <glm::mat4> voxelTransforms;
+		};
+
+		struct VoxelLocation
+		{
+			std::string batchName;
+			unsigned int voxelIndex;
+		};
+
 		void SetView ( glm::mat4 const & );
 		void SetProjection ( glm::mat4 const & );
 
@@ -39,9 +51,15 @@ namespace vw
 		GLuint indexBuffer;
 		GLuint shaderProgram;
 		GLuint vertexArray;
+		//GLuint transformBuffer;
 		std::vector <GLuint> voxelTypeTextures;
-		GLuint modelMatrixUniformLocation;
+
+		GLuint modelMatricesUniformLocation;
 		GLuint viewMatrixUniformLocation;
 		GLuint projectionMatrixUniformLocation;
+		GLuint colorUniformLocation;
+		
+		std::unordered_map <std::string, Batch> batches;
+		//std::unordered_map <glm::vec3, VoxelLocation> voxelLocations;
 	};
 }
