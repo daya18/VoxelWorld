@@ -2,7 +2,7 @@
 
 #include "Window.hpp"
 #include "Renderer.hpp"
-#include "World.hpp"
+#include "VoxelWorld.hpp"
 
 namespace vw
 {
@@ -17,12 +17,20 @@ namespace vw
 		Application & operator = ( Application && ) = delete;
 
 		void Run ();
+		Window & GetWindow ();
 
 	private:
 		bool quit { false };
 		Window window;
 		Renderer renderer;
-		glm::mat4 projectionMatrix;
-		World world;
+		std::unordered_map <std::string, GLuint> voxelTypeTextures;
+		std::unique_ptr <VoxelWorld> world;
+
+		friend class VoxelWorld;
+		friend class VoxelWorldRenderer;
 	};
+
+	// Implementation
+	inline Window & Application::GetWindow () { return window; }
+
 }

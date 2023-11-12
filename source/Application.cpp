@@ -1,5 +1,8 @@
 #include "Application.hpp"
 
+#include "TestVoxelWorld.hpp"
+#include "Utility.hpp"
+
 namespace vw
 {
 	Application::Application ()
@@ -7,12 +10,13 @@ namespace vw
 		window { "Voxel World", { 1280, 720 } },
 		renderer ( window ),
 		
-		projectionMatrix ( glm::perspective ( 
-			45.0f, static_cast <float> ( 1280 ) / static_cast <float> ( 720 ), 0.001f, 100.0f ) ),
+		voxelTypeTextures {
+			{ "Grass", CreateTextureFromFile ( "image/TestBlockTexture.png" ) }
+		},
 
-		world ( window, renderer )
+		world ( std::make_unique <TestVoxelWorld> ( *this ) )
 	{
-		window.EnableRawMouseInput ();
+		window.EnableRawMouseInput ();	
 	}
 
 	void Application::Run ()
@@ -29,11 +33,12 @@ namespace vw
 
 			window.HandleInput ();
 
-			world.Update ( 1.0f );
+			world->Update ( 1.0f );
 
-			window.MakeGLContextCurrent ();
-			renderer.Render ();
-			window.SwapBuffers ();
+			renderer.Begin ();
+			world->Render ();
+			renderer.End ();
+
 		}
 	}
 }

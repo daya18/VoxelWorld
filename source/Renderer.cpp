@@ -5,28 +5,27 @@
 namespace vw
 {
 	Renderer::Renderer ( Window & window )
+		: window ( & window )
 	{
 		window.MakeGLContextCurrent ();
 		gladLoadGL ();
-		
+
 		glDebugMessageCallback ( GLDebugMessageCallback, nullptr );
 
 		glEnable ( GL_DEBUG_OUTPUT );
 		glEnable ( GL_DEPTH_TEST );
 
-		voxelRenderer = std::make_unique <VoxelRenderer> ();
 	}
 
-	void Renderer::SetCamera ( Camera & camera )
+	void Renderer::Begin ()
 	{
-		voxelRenderer->SetCamera ( camera );
-	}
-
-	void Renderer::Render ()
-	{
+		window->MakeGLContextCurrent ();
 		glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+	}
 
-		voxelRenderer->Render ();
+	void Renderer::End ()
+	{
+		window->SwapBuffers ();
 	}
 
 	void Renderer::GLDebugMessageCallback ( 

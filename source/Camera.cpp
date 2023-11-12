@@ -29,10 +29,10 @@ namespace vw
 			Move ( -GetRight () * moveSensitivity );
 		
 		if ( window->GetKey ( GLFW_KEY_W ) == GLFW_PRESS )
-			Move ( GetForward () * moveSensitivity );
+			Move ( glm::cross ( glm::vec3 { 0, 1, 0 }, GetRight () ) * moveSensitivity );
 
 		if ( window->GetKey ( GLFW_KEY_S ) == GLFW_PRESS )
-			Move ( -GetForward () * moveSensitivity );
+			Move ( -glm::cross ( glm::vec3 { 0, 1, 0 }, GetRight () ) * moveSensitivity );
 		
 		if ( window->GetKey ( GLFW_KEY_SPACE ) == GLFW_PRESS )
 			Move ( glm::vec3 { 0.0f, 1.0f, 0.0f } * moveSensitivity );

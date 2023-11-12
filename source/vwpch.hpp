@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <functional>
 #include <filesystem>
+#include <array>
 
 #include <glad/glad.h>
 
@@ -16,5 +17,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/hash.hpp>
 
 #include <stb_image.h>
