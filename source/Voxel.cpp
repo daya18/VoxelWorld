@@ -1,40 +1,54 @@
 #include "Voxel.hpp"
 
 #include "VoxelWorld.hpp"
+#include "VoxelWorld.hpp"
+#include "Application.hpp"
+#include "Utility.hpp"
 
 namespace vw
 {
-	std::unordered_map <Voxel::Sides, glm::ivec3> Voxel::directionVectors
-	{
-		{ Sides::up,		{  0,  1,  0 } },
-		{ Sides::down,		{  0, -1,  0 } },
-		{ Sides::left,		{ -1,  0,  0 } },
-		{ Sides::right,		{  1,  0,  0 } },
-		{ Sides::forward,	{  0,  0,  1 } },
-		{ Sides::back,		{  0,  0, -1 } },
-	};
-	
-	std::unordered_map <Voxel::Sides, Voxel::Sides> Voxel::oppositeSides
-	{
-		{ Sides::up,		Sides::down },
-		{ Sides::down,		Sides::up },
-		{ Sides::left,		Sides::right },
-		{ Sides::right,		Sides::left },
-		{ Sides::forward,	Sides::back },
-		{ Sides::back,		Sides::forward },
-	};
-
-	std::array <Voxel::Sides, 6> Voxel::sides { Sides::up, Sides::down, Sides::left, Sides::right, Sides::forward, Sides::back };
-
 	Voxel::Voxel ( VoxelWorld & world, Definition const & definition )
-		: world ( & world ), position ( definition.position ), type ( definition.type )
+	:	world ( & world ), 
+		position ( definition.position ), 
+		type ( definition.type ),
+		transform ( glm::translate ( glm::identity <glm::mat4> (), position ) ),
+		worldSpaceModel ( world.GetApplication ().GetVoxelModel () )
 	{
-
 	}
 
 	bool Voxel::CheckNeighbour ( Sides side ) const
 	{
-		return world->voxels.find ( position + directionVectors [ side ] ) != world->voxels.end ();
+		return neighbours.find ( side ) != neighbours.end ();
 	}
 
+	bool Voxel::CheckFaceIntersection ( Sides side, float & distance ) const
+	{
+		auto & faceMesh { worldSpaceModel.GetFaceMesh (side) };
+
+		for ( int triangleIndex { 0 }; triangleIndex < 2; ++triangleIndex )
+		{
+			int baseIndex { triangleIndex * 3 };
+
+			glm::vec2 intersectionBaryPosition;
+			float intersectionDistance;
+
+			bool intersects {
+				glm::intersectRayTriangle (
+					world->camera.GetPosition (),
+					world->camera.GetTargetDirection (),
+					faceMesh.vertices [ faceMesh.indices [ baseIndex + 0 ] ].position,
+					faceMesh.vertices [ faceMesh.indices [ baseIndex + 1 ] ].position,
+					faceMesh.vertices [ faceMesh.indices [ baseIndex + 2 ] ].position,
+					intersectionBaryPosition, intersectionDistance )
+			};
+
+			if ( intersects )
+			{
+				distance = intersectionDistance;
+				return true;
+			}
+		}
+
+		return false;
+	}
 }

@@ -3,6 +3,7 @@
 #include "Window.hpp"
 #include "Renderer.hpp"
 #include "VoxelWorld.hpp"
+#include "VoxelModel.hpp"
 
 namespace vw
 {
@@ -18,9 +19,11 @@ namespace vw
 
 		void Run ();
 		Window & GetWindow ();
+		VoxelModel const & GetVoxelModel () const;
 
 	private:
 		bool quit { false };
+		VoxelModel voxelModel;
 		Window window;
 		Renderer renderer;
 		std::unordered_map <std::string, GLuint> voxelTypeTextures;
@@ -32,5 +35,5 @@ namespace vw
 
 	// Implementation
 	inline Window & Application::GetWindow () { return window; }
-
+	inline VoxelModel const & Application::GetVoxelModel () const { return voxelModel; }
 }

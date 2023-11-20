@@ -30,10 +30,11 @@ namespace vw
 	private:
 		struct Batch
 		{
-			VectorBuffer <glm::vec4> transformIndexBuffer;
+			unsigned int voxelCount;
+			GLuint transformIndexBuffer;
 		};
 		
-		GLuint GetFaceIndexOffset ( Voxel::Sides );
+		GLuint GetFaceIndexOffset ( Sides );
 		void SetView ( glm::mat4 const & );
 		void SetProjection ( glm::mat4 const & );
 
@@ -52,7 +53,6 @@ namespace vw
 		GLuint vertexArray;
 		
 		VoxelWorld * voxelWorld;
-		float voxelScale = 1.0f;
 		
 		// Uniform locations
 		GLuint modelMatricesUniformLocation;
@@ -61,15 +61,9 @@ namespace vw
 		GLuint colorUniformLocation;
 
 		GLuint transformBuffer;
-		//std::vector <Voxel *> voxels;
-		//VectorBuffer <glm::mat4> transformBuffer;
 		
 						// Texture
-		std::unordered_map <GLuint, std::unordered_map <Voxel::Sides, Batch> >batches;
+		std::unordered_map <GLuint, std::unordered_map <Sides, Batch> >batches;
 		
 	};
-
-	// Implementation
-	inline void VoxelWorldRenderer::SetVoxelScale ( float scale ) { voxelScale = scale; }
-	inline float VoxelWorldRenderer::GetVoxelScale () const { return voxelScale; }
 }

@@ -8,17 +8,12 @@ namespace vw
 	TestVoxelWorld::TestVoxelWorld ( Application & application )
 		: VoxelWorld ( application )
 	{
-		std::vector <Voxel::Definition> voxelDefinitions;
+		//Fill ( { 1, -1, -1 }, { -1, 1, 1 }, "Grass" );
+		Fill ( { -10, -3, -10 }, { 10, 0, 10 }, "Grass" );
 
-		for ( int x = -10; x < 10; ++x )
-		{
-			for ( int z = -10; z < 10; ++z )
-			{
-				voxelDefinitions.push_back ( { { x, -5, z }, "Grass" } );
-			}
-		}
-		
-		AddVoxels ( voxelDefinitions );
+		//AddVoxel ( { 0, 0, 0 }, "Grass" );
+
+		//RemoveVoxels ( { { 0, 0, 0 } } );
 
 		auto & window { application.GetWindow () };
 		

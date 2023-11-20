@@ -16,7 +16,7 @@ namespace vw
 
 		world ( std::make_unique <TestVoxelWorld> ( *this ) )
 	{
-		window.EnableRawMouseInput ();	
+		window.EnableRawMouseInput ();
 	}
 
 	void Application::Run ()

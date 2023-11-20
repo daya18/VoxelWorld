@@ -14,6 +14,9 @@ namespace vw
 		glm::mat4 const & GetViewMatrix () const;
 		glm::mat4 const & GetProjectionMatrix () const;
 		
+		glm::vec3 const & GetPosition () const;
+		glm::vec3 GetTargetDirection () const;
+
 		void Update ( float deltaTime );
 
 	private:
@@ -43,4 +46,7 @@ namespace vw
 	inline glm::mat4 const & Camera::GetProjectionMatrix () const { return projectionMatrix; }
 	inline glm::vec3 Camera::GetRight () const { return glm::normalize ( glm::cross ( lookDirection, glm::vec3 ( 0, 1, 0 ) ) ); }
 	inline glm::vec3 Camera::GetForward () const { return glm::normalize ( lookDirection ); }
+	inline glm::vec3 const & Camera::GetPosition () const { return position; }
+	inline glm::vec3 Camera::GetTargetDirection () const { return glm::normalize ( lookDirection ) ; }
+
 }

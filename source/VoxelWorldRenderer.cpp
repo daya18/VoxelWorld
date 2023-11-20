@@ -8,7 +8,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-#include "OBJ_Loader.h"
+#include "impex.hpp"
 
 namespace vw
 {
@@ -47,6 +47,7 @@ namespace vw
 	{
 		if ( destroyResources )
 		{
+			glDeleteBuffers ( 1, &transformBuffer );
 			glDeleteBuffers ( 1, &vertexBuffer );
 			glDeleteBuffers ( 1, &indexBuffer );
 			glDeleteProgram ( shaderProgram );
@@ -93,31 +94,41 @@ namespace vw
 		std::vector <glm::mat4> voxelTransforms;
 		voxelTransforms.reserve ( world->voxels.size () );
 
-		for ( auto & [ voxelPos, voxel ] : world->voxels )
-		{
-			auto translation { glm::vec3 { voxelPos } * voxelScale * 2.0f };
-			glm::mat4 translationMat { glm::translate ( glm::identity <glm::mat4> (), translation ) };
-			glm::mat4 scaleMat { glm::scale ( glm::identity <glm::mat4> (), glm::vec3 ( voxelScale, voxelScale, voxelScale ) ) };
-			voxelTransforms.push_back ( translationMat * scaleMat );
-		}
+		for ( auto & [voxelPos, voxel] : world->voxels )
+			voxelTransforms.push_back ( voxel.GetTransformMatrix () );
 
+		glDeleteBuffers ( 1, &transformBuffer );
 		transformBuffer = CreateBufferWithData ( voxelTransforms, GL_UNIFORM_BUFFER );
 
 		batches.clear ();
 
-		int voxelIndex { 0 };
-		for ( auto & [ voxelPos, voxel ] : world->voxels )
+		std::unordered_map <GLuint, std::unordered_map <Sides, std::vector <glm::vec4> > > batchTransformIndices;
+
+		float voxelIndex { 0 };
+		for ( auto & [voxelPos, voxel] : world->voxels )
 		{
-			for ( auto const & side : Voxel::sides )
+			auto texture { application->voxelTypeTextures.at ( voxel.GetType () ) };
+
+			for ( auto const & side : sides )
 			{
 				if ( voxel.CheckNeighbour ( side ) )
 					continue;
 
-				batches [ application->voxelTypeTextures.at ( voxel.GetType () ) ]
-					[ side ].transformIndexBuffer.PushBack ( { glm::vec4 { static_cast < float > ( voxelIndex ) } } );
+				batchTransformIndices [ texture ] [ side ].push_back ( glm::vec4 { voxelIndex } );
 			}
 
 			++voxelIndex;
+		}
+
+		for ( auto const & [type, sideIndices] : batchTransformIndices )
+		{
+			for ( auto const & [side, indices] : sideIndices )
+			{
+				auto & batch { batches [ type ][ side ] };
+				glDeleteBuffers ( 1, & ( batch.transformIndexBuffer ) );
+				batch.transformIndexBuffer = CreateBufferWithData ( indices, GL_UNIFORM_BUFFER );
+				batch.voxelCount = indices.size ();
+			}
 		}
 	}
 
@@ -140,48 +151,22 @@ namespace vw
 				glBindTexture ( GL_TEXTURE_2D, texture );
 				glUniform1i ( glGetUniformLocation ( shaderProgram, "u_texture" ), 0 );
 
-				glBindBufferBase ( GL_UNIFORM_BUFFER, 1, batch.transformIndexBuffer.Get () );
+				glBindBufferBase ( GL_UNIFORM_BUFFER, 1, batch.transformIndexBuffer );
 
 				glDrawElementsInstanced (
 					GL_TRIANGLES,
 					6,
 					GL_UNSIGNED_INT,
 					reinterpret_cast < void * > ( GetFaceIndexOffset ( face ) ),
-					batch.transformIndexBuffer.GetElementCount () );
+					batch.voxelCount );
 			}
 		}
 	}
 
 	void VoxelWorldRenderer::CreateGeometryBuffers ()
 	{
-
-		std::vector <GLfloat> vertices;
-		std::vector <GLuint> indices;
-
-		objl::Loader loader;
-		loader.LoadFile ( "model/Voxel.obj" );
-
-		auto indexOffset { 0 };
-
-		for ( auto const & mesh : loader.LoadedMeshes )
-		{
-			for ( auto const & vertex : mesh.Vertices )
-			{
-				vertices.push_back ( vertex.Position.X );
-				vertices.push_back ( vertex.Position.Y );
-				vertices.push_back ( vertex.Position.Z );
-
-				vertices.push_back ( vertex.TextureCoordinate.X );
-				vertices.push_back ( vertex.TextureCoordinate.Y );
-			}
-
-			for ( auto const & index : mesh.Indices )
-			{
-				indices.push_back ( indexOffset + index );
-			}
-
-			indexOffset += mesh.Vertices.size ();
-		}
+		std::vector <GLfloat> vertices { impex::InterleaveVertices ( application->voxelModel.GetScene ().vertices ) };
+		std::vector <GLuint> indices { application->voxelModel.GetScene().indices };
 
 		glGenBuffers ( 1, &vertexBuffer );
 		glBindBuffer ( GL_ARRAY_BUFFER, vertexBuffer );
@@ -234,17 +219,18 @@ namespace vw
 		glVertexAttribBinding ( 1, 0 );
 	}
 
-	GLuint VoxelWorldRenderer::GetFaceIndexOffset ( Voxel::Sides face )
+	GLuint VoxelWorldRenderer::GetFaceIndexOffset ( Sides face )
 	{
 		// TO DO: Hard coded values, bad...
 		switch ( face )
 		{
-		case Voxel::Sides::back:	return ( 6 * 0 ) * sizeof ( GLuint );
-		case Voxel::Sides::left:	return ( 6 * 1 ) * sizeof ( GLuint );
-		case Voxel::Sides::forward:	return ( 6 * 2 ) * sizeof ( GLuint );
-		case Voxel::Sides::up:		return ( 6 * 3 ) * sizeof ( GLuint );
-		case Voxel::Sides::down:	return ( 6 * 4 ) * sizeof ( GLuint );
-		case Voxel::Sides::right:	return ( 6 * 5 ) * sizeof ( GLuint );
+		case Sides::back:	return ( 6 * 0 ) * sizeof ( GLuint );
+		case Sides::left:	return ( 6 * 1 ) * sizeof ( GLuint );
+		case Sides::forward:	return ( 6 * 2 ) * sizeof ( GLuint );
+		case Sides::up:		return ( 6 * 3 ) * sizeof ( GLuint );
+		case Sides::down:	return ( 6 * 4 ) * sizeof ( GLuint );
+		case Sides::right:	return ( 6 * 5 ) * sizeof ( GLuint );
+		default:					return 0;
 		}
 	}
 }

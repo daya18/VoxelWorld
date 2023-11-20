@@ -1,7 +1,5 @@
 #pragma once
 
-#include "VoxelWorldRenderer.hpp"
-
 namespace vw
 {
 	class Window;
