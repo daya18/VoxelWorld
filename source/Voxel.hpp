@@ -21,19 +21,22 @@ namespace vw
 		glm::vec3 const & GetPosition () const;
 		std::string const & GetType () const;
 		
-		std::unordered_map < Sides, Voxel *> const & GetNeighbours () const;
+		//std::unordered_map < Sides, Voxel *> const & GetNeighbours () const;
 		
 		bool CheckNeighbour ( Sides ) const;
 		glm::mat4 const & GetTransformMatrix () const;
 		bool CheckFaceIntersection ( Sides side, float & distance ) const;
 
 	private:
+		void ClearNeighbours ();
+		void SetNeighbour ( Sides, Voxel & );
 
 		VoxelWorld * world;
 		glm::vec3 position;
 		std::string type;
 		glm::mat4 transform;
-		std::unordered_map < Sides, Voxel *> neighbours;
+		//std::unordered_map < Sides, Voxel *> neighbours;
+		std::array <Voxel *, 6> neighbours;
 		VoxelModel worldSpaceModel;
 
 		friend class VoxelWorld;
@@ -42,6 +45,6 @@ namespace vw
 	// Implementation
 	inline glm::vec3 const & Voxel::GetPosition () const { return position; }
 	inline std::string const & Voxel::GetType () const { return type; }
-	inline std::unordered_map < Sides, Voxel *> const & Voxel::GetNeighbours () const { return neighbours; }
+	//inline std::unordered_map < Sides, Voxel *> const & Voxel::GetNeighbours () const { return neighbours; }
 	inline glm::mat4 const & Voxel::GetTransformMatrix () const { return transform; }
 }

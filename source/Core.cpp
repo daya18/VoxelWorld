@@ -33,4 +33,31 @@ namespace vw
 		{ Sides::forward,	"Forward" },
 		{ Sides::back,		"Back" },
 	};
+
+
+	Sides GetOppositeSide ( Sides side )
+	{
+		switch ( side )
+		{
+		case Sides::up:			return Sides::down;
+		case Sides::down:		return Sides::up;
+		case Sides::left:		return Sides::right;
+		case Sides::right:		return Sides::left;
+		case Sides::forward:	return Sides::back;
+		case Sides::back:		return Sides::forward;
+		}
+	}
+
+	glm::vec3 GetDirectionVector ( Sides side )
+	{
+		switch ( side )
+		{
+		case Sides::up:			return { 0,  1,  0 };
+		case Sides::down:		return { 0, -1,  0 };
+		case Sides::left:		return { -1,  0,  0 };
+		case Sides::right:		return { 1,  0,  0 };
+		case Sides::forward:	return { 0,  0,  1 };
+		case Sides::back:		return { 0,  0, -1 };
+		}
+	}
 }

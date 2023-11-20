@@ -18,7 +18,7 @@ namespace vw
 
 	bool Voxel::CheckNeighbour ( Sides side ) const
 	{
-		return neighbours.find ( side ) != neighbours.end ();
+		return neighbours [ static_cast <int> ( side ) ] != nullptr;
 	}
 
 	bool Voxel::CheckFaceIntersection ( Sides side, float & distance ) const
@@ -50,5 +50,16 @@ namespace vw
 		}
 
 		return false;
+	}
+	
+	void Voxel::ClearNeighbours ()
+	{
+		for ( auto & neighbour : neighbours )
+			neighbour = nullptr;
+	}
+
+	void Voxel::SetNeighbour ( Sides side, Voxel & neighbour )
+	{
+		neighbours [ static_cast < int > ( side ) ] = &neighbour;
 	}
 }

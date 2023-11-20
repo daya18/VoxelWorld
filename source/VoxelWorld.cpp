@@ -71,7 +71,7 @@ namespace vw
 	void VoxelWorld::UpdateVoxelNeighbours ()
 	{
 		for ( auto & [ position, voxel ] : voxels )
-			voxel.neighbours.clear ();
+			voxel.ClearNeighbours ();
 
 		for ( auto & [ lvoxelPosition, lvoxel] : voxels )
 		{
@@ -79,10 +79,10 @@ namespace vw
 			{
 				for ( auto const & side : sides )
 				{
-					if ( lvoxelPosition + directionVectors.at ( side ) * voxelScale * 2.0f == rvoxelPosition )
+					if ( lvoxelPosition + GetDirectionVector ( side ) * voxelScale * 2.0f == rvoxelPosition )
 					{
-						lvoxel.neighbours [side] = &rvoxel;
-						rvoxel.neighbours [ oppositeSides.at ( side ) ] = &lvoxel;
+						lvoxel.SetNeighbour ( side, rvoxel );
+						rvoxel.SetNeighbour ( GetOppositeSide ( side ), lvoxel );
 					}
 				}
 			}

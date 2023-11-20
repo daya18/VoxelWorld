@@ -8,4 +8,7 @@ namespace vw
 	extern std::unordered_map <Sides, Sides> const oppositeSides;
 	extern std::array <Sides, 6> const sides;
 	extern std::unordered_map <Sides, std::string> const sideNames;
+
+	Sides GetOppositeSide ( Sides );
+	glm::vec3 GetDirectionVector ( Sides );
 }
