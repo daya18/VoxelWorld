@@ -2,14 +2,13 @@
 
 #include "VoxelWorld.hpp"
 #include "Application.hpp"
-#include "Utility.hpp"
-
+#include "core.hpp"
 
 namespace vw
 {
 	float const VoxelWorldRaycaster::rayLength { 10.0f };
 
-	VoxelWorldRaycaster::VoxelWorldRaycaster ( Application const & application, VoxelWorld const & world )
+	VoxelWorldRaycaster::VoxelWorldRaycaster ( Application const & application, VoxelWorld & world )
 		: application ( & application ), world ( & world )
 	{
 	}
@@ -20,10 +19,10 @@ namespace vw
 
 		bool intersects { false };
 		float minIntersectionDistance { std::numeric_limits <float>::max () };
-		Voxel const * intersectingVoxel;
-		Sides minIntersectionSide;
+		Voxel * intersectingVoxel { nullptr };
+		Sides minIntersectionSide { Sides::left };
 
-		for ( auto const & voxelWithinReach : voxelsWithinReach )
+		for ( auto & voxelWithinReach : voxelsWithinReach )
 		{
 			float intersectionDistance;
 			Sides intersectionSide;
@@ -40,18 +39,16 @@ namespace vw
 			}
 		}
 
-		if ( intersects )
-		{
-			std::cout << glm::to_string ( intersectingVoxel->GetPosition () ) << ' ' << sideNames.at ( minIntersectionSide ) << std::endl;
-		}
+		targetVoxel = intersectingVoxel;
+		targetVoxelSide = minIntersectionSide;
 	}
 
-	std::vector <Voxel const *> VoxelWorldRaycaster::GetVoxelsWithinReach () const
+	std::vector <Voxel *> VoxelWorldRaycaster::GetVoxelsWithinReach () const
 	{
-		std::vector <Voxel const *> voxels;
+		std::vector <Voxel *> voxels;
 		voxels.reserve ( world->voxels.size () );
 
-		for ( auto const & [voxelPosition, voxel] : world->voxels )
+		for ( auto & [voxelPosition, voxel] : world->voxels )
 		{
 			auto cameraVoxelDistance { glm::distance ( world->camera.GetPosition (), voxel.GetPosition () ) };
 
@@ -62,6 +59,4 @@ namespace vw
 		voxels.shrink_to_fit ();
 		return voxels;
 	}
-
-	
 }

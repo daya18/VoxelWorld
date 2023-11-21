@@ -3,7 +3,7 @@
 #include "VoxelWorld.hpp"
 #include "VoxelWorld.hpp"
 #include "Application.hpp"
-#include "Utility.hpp"
+#include "core.hpp"
 
 #include <ei/3dintersection.hpp>
 
@@ -40,12 +40,12 @@ namespace vw
 
 		switch ( eiHitSide )
 		{
-		case ei::HitSide::X_NEG: hitSide = Sides::left; break;
-		case ei::HitSide::X_POS: hitSide = Sides::right; break;
-		case ei::HitSide::Y_NEG: hitSide = Sides::down; break;
-		case ei::HitSide::Y_POS: hitSide = Sides::up; break;
-		case ei::HitSide::Z_NEG: hitSide = Sides::back; break;
-		case ei::HitSide::Z_POS: hitSide = Sides::forward; break;
+		case ei::HitSide::X_NEG: hitSide = Sides::left;		break;
+		case ei::HitSide::X_POS: hitSide = Sides::right;	break;
+		case ei::HitSide::Y_NEG: hitSide = Sides::down;		break;
+		case ei::HitSide::Y_POS: hitSide = Sides::up;		break;
+		case ei::HitSide::Z_NEG: hitSide = Sides::back;		break;
+		case ei::HitSide::Z_POS: hitSide = Sides::forward;	break;
 		}
 
 		return intersects;

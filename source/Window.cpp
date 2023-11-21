@@ -12,7 +12,7 @@ namespace vw
 		glfwWindowHint ( GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE );
 		window = glfwCreateWindow ( size.x, size.y, title.data (), nullptr, nullptr );
 		glfwSetWindowUserPointer ( window, this );
-		
+
 		glfwSetCursorEnterCallback ( window, mouseEnterCallback );
 		glfwSetCursorPosCallback ( window, mouseMoveCallback );
 		glfwSetFramebufferSizeCallback ( window, framebufferResizeCallback );
@@ -75,6 +75,11 @@ namespace vw
 			GetWindow ( glfwWindow )->EmitSignal ( "KeyRelease" );
 	}
 
+	void Window::mouseButtonCallback ( GLFWwindow * window, int button, int action, int mods )
+	{
+
+	}
+
 	void Window::mouseEnterCallback ( GLFWwindow * glfwWindow, int entered )
 	{
 	/*	if ( entered )
@@ -92,6 +97,11 @@ namespace vw
 		return glfwGetKey ( window, key );
 	}
 	
+	bool Window::GetButton ( int button )
+	{
+		return glfwGetMouseButton ( window, button );
+	}
+
 	void Window::HandleInput ()
 	{
 		double x, y;

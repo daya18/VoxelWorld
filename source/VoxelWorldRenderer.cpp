@@ -2,7 +2,7 @@
 
 #include "Camera.hpp"
 #include "VoxelWorld.hpp"
-#include "Utility.hpp"
+#include "core.hpp"
 #include "Application.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION

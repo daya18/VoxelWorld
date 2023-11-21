@@ -1,6 +1,5 @@
 #pragma once
 
-#include "VectorBuffer.hpp"
 #include "Voxel.hpp"
 
 namespace vw

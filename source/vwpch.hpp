@@ -7,6 +7,7 @@
 #include <functional>
 #include <filesystem>
 #include <array>
+#include <chrono>
 
 #include <glad/glad.h>
 

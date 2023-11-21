@@ -28,6 +28,7 @@ namespace vw
 
 		float GetVoxelScale () const;
 		Application const & GetApplication () const;
+		VoxelWorldRaycaster & GetRaycaster ();
 
 	private:
 		void UpdateAllVoxelNeighbours ();
@@ -51,4 +52,5 @@ namespace vw
 	// Implementation
 	inline float VoxelWorld::GetVoxelScale () const { return voxelScale; }
 	inline Application const & VoxelWorld::GetApplication () const { return *application; }
+	inline VoxelWorldRaycaster & VoxelWorld::GetRaycaster () { return raycaster; }
 }

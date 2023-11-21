@@ -11,18 +11,26 @@ namespace vw
 	class VoxelWorldRaycaster
 	{
 	public:
-		VoxelWorldRaycaster ( Application const &, VoxelWorld const & );
+		VoxelWorldRaycaster ( Application const &, VoxelWorld & );
 
 		void Update ();
+		Voxel * GetTargetVoxel () const;
+		Sides GetTargetVoxelSide () const;
 
 	private:
-		//static std::string GetVoxelFaceString ( Voxel::sides side );
-		
-		std::vector <Voxel const *> GetVoxelsWithinReach () const;
+		std::vector <Voxel *> GetVoxelsWithinReach () const;
 
 		static const float rayLength;
 
 		Application const * application;
-		VoxelWorld const * world;
+		VoxelWorld * world;
+		Voxel * targetVoxel { nullptr };
+		Sides targetVoxelSide;
 	};
+
+
+
+	// Implementation
+	inline Voxel * VoxelWorldRaycaster::GetTargetVoxel () const { return targetVoxel; }
+	inline Sides VoxelWorldRaycaster::GetTargetVoxelSide () const { return targetVoxelSide; }
 }

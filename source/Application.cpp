@@ -1,7 +1,6 @@
 #include "Application.hpp"
 
-#include "TestVoxelWorld.hpp"
-#include "Utility.hpp"
+#include "core.hpp"
 
 namespace vw
 {
@@ -14,15 +13,23 @@ namespace vw
 			{ "Grass", CreateTextureFromFile ( "image/TestBlockTexture.png" ) }
 		},
 
-		world ( std::make_unique <TestVoxelWorld> ( *this ) )
+		world ( *this )
 	{
 		window.EnableRawMouseInput ();
 	}
 
 	void Application::Run ()
 	{
+		lastFrameTime = std::chrono::steady_clock::now ();
+
 		while ( ! quit )
 		{
+			auto now { std::chrono::steady_clock::now () };
+			auto deltaTimeDuration { now - lastFrameTime };
+			auto deltaTimeMs { std::chrono::duration_cast < std::chrono::milliseconds > ( deltaTimeDuration ).count () };
+			float deltaTime { static_cast < float > ( deltaTimeMs ) / 1000.0f };
+			lastFrameTime = now;
+
 			glfwPollEvents ();
 			
 			if ( window.ShouldClose () )
@@ -33,12 +40,11 @@ namespace vw
 
 			window.HandleInput ();
 
-			world->Update ( 1.0f );
+			world.Update ( deltaTime );
 
 			renderer.Begin ();
-			world->Render ();
+			world.Render ();
 			renderer.End ();
-
 		}
 	}
 }

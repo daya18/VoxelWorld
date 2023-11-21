@@ -37,12 +37,12 @@ target_sources ( VoxelWorld PRIVATE
 	"source/VoxelWorld.cpp" 
 	"source/SignalEmitter.cpp"
 	"source/Camera.cpp"  
-	"source/VectorBuffer.cpp"
-	"source/Voxel.cpp"
-	"source/TestVoxelWorld.cpp"  
-	"source/Utility.cpp" 
 	
- "source/VoxelWorldRaycaster.cpp"    "source/impex.cpp" "source/VoxelModel.cpp" "source/Core.cpp")
+	"source/Voxel.cpp"
+	"source/World.cpp"  
+	 
+	
+ "source/VoxelWorldRaycaster.cpp"    "source/impex.cpp" "source/VoxelModel.cpp" "source/Core.cpp"  "source/Player.cpp")
 
 target_include_directories ( VoxelWorld PRIVATE 
 	external/glad/include

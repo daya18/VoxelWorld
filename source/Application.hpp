@@ -2,7 +2,7 @@
 
 #include "Window.hpp"
 #include "Renderer.hpp"
-#include "VoxelWorld.hpp"
+#include "World.hpp"
 #include "VoxelModel.hpp"
 
 namespace vw
@@ -27,7 +27,8 @@ namespace vw
 		Window window;
 		Renderer renderer;
 		std::unordered_map <std::string, GLuint> voxelTypeTextures;
-		std::unique_ptr <VoxelWorld> world;
+		World world;
+		std::chrono::steady_clock::time_point lastFrameTime;
 
 		friend class VoxelWorld;
 		friend class VoxelWorldRenderer;
