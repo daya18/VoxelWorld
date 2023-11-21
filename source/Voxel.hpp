@@ -2,6 +2,7 @@
 
 #include "Core.hpp"
 #include "VoxelModel.hpp"
+#include <ei/3dtypes.hpp>
 
 namespace vw
 {
@@ -22,7 +23,7 @@ namespace vw
 		std::string const & GetType () const;
 		bool CheckNeighbour ( Sides ) const;
 		glm::mat4 const & GetTransformMatrix () const;
-		bool CheckFaceIntersection ( Sides side, float & distance ) const;
+		bool CheckCameraRayIntersection ( float & distance, Sides & hitSide ) const;
 
 	private:
 		void ClearNeighbours ();
@@ -33,7 +34,7 @@ namespace vw
 		std::string type;
 		glm::mat4 transform;
 		std::array <Voxel *, 6> neighbours;
-		VoxelModel worldSpaceModel;
+		ei::Box eiBox;
 
 		friend class VoxelWorld;
 	};

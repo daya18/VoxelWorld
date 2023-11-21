@@ -4,6 +4,7 @@
 #include "Application.hpp"
 #include "Utility.hpp"
 
+
 namespace vw
 {
 	float const VoxelWorldRaycaster::rayLength { 10.0f };
@@ -24,26 +25,25 @@ namespace vw
 
 		for ( auto const & voxelWithinReach : voxelsWithinReach )
 		{
-			for ( auto const & side : sides )
-			{
-				float intersectionDistance;
+			float intersectionDistance;
+			Sides intersectionSide;
 
-				if ( voxelWithinReach->CheckFaceIntersection ( side, intersectionDistance ) )
+			if ( voxelWithinReach->CheckCameraRayIntersection ( intersectionDistance, intersectionSide ) )
+			{
+				if ( intersectionDistance < minIntersectionDistance )
 				{
-					if ( intersectionDistance < minIntersectionDistance )
-					{
-						intersects = true;
-						minIntersectionDistance = intersectionDistance;
-						intersectingVoxel = voxelWithinReach;
-						minIntersectionSide = side;
-					}
+					intersects = true;
+					minIntersectionDistance = intersectionDistance;
+					intersectingVoxel = voxelWithinReach;
+					minIntersectionSide = intersectionSide;
 				}
 			}
 		}
 
 		if ( intersects )
-			std::cout << glm::to_string ( intersectingVoxel->GetPosition () ) << ' ' << sideNames.at (minIntersectionSide) << std::endl;
-
+		{
+			std::cout << glm::to_string ( intersectingVoxel->GetPosition () ) << ' ' << sideNames.at ( minIntersectionSide ) << std::endl;
+		}
 	}
 
 	std::vector <Voxel const *> VoxelWorldRaycaster::GetVoxelsWithinReach () const

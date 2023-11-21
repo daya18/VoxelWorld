@@ -5,18 +5,22 @@
 #include "Application.hpp"
 #include "Utility.hpp"
 
+#include <ei/3dintersection.hpp>
+
 namespace vw
 {
 	Voxel::Voxel ( VoxelWorld & world, Definition const & definition )
-	: 
+	:
 		world ( & world ),
 		position ( definition.position ),
 		type ( definition.type ),
-		transform ( glm::translate ( glm::identity <glm::mat4> (), position ) ),
-		worldSpaceModel ( world.GetApplication ().GetVoxelModel () )
+		transform ( glm::translate ( glm::identity <glm::mat4> (), position ) )
 	{
-		glm::mat4 scaleMatrix { glm::scale ( glm::identity <glm::mat4> (), { 0.5f, 0.5f, 0.5f } ) };
-		worldSpaceModel.Transform ( transform * scaleMatrix );
+		glm::vec3 min { transform * glm::vec4 { -0.5f, -0.5f, -0.5f, 1.0f } };
+		glm::vec3 max { transform * glm::vec4 {  0.5f,  0.5f,  0.5f, 1.0f } };
+
+		eiBox.min = { min.x, min.y, min.z };
+		eiBox.max = { max.x, max.y, max.z };
 	}
 
 	bool Voxel::CheckNeighbour ( Sides side ) const
@@ -24,35 +28,27 @@ namespace vw
 		return neighbours [ static_cast < int > ( side ) ] != nullptr;
 	}
 
-	bool Voxel::CheckFaceIntersection ( Sides side, float & distance ) const
+	bool Voxel::CheckCameraRayIntersection ( float & distance, Sides & hitSide ) const
 	{
-		auto & faceMesh { worldSpaceModel.GetFaceMesh ( side ) };
+		glm::vec3 cameraPos { world->camera.GetPosition () };
+		glm::vec3 cameraDir { world->camera.GetTargetDirection () };
 
-		for ( int triangleIndex { 0 }; triangleIndex < 2; ++triangleIndex )
+		ei::Ray ray ( { cameraPos.x, cameraPos.y, cameraPos.z }, { cameraDir.x, cameraDir.y, cameraDir.z } );
+
+		ei::HitSide eiHitSide;
+		bool intersects { ei::intersects ( ray, eiBox, distance, eiHitSide ) };
+
+		switch ( eiHitSide )
 		{
-			int baseIndex { triangleIndex * 3 };
-
-			glm::vec2 intersectionBaryPosition;
-			float intersectionDistance;
-
-			bool intersects {
-				glm::intersectRayTriangle (
-					world->camera.GetPosition (),
-					world->camera.GetTargetDirection (),
-					faceMesh.vertices [ faceMesh.indices [ baseIndex + 0 ] ].position,
-					faceMesh.vertices [ faceMesh.indices [ baseIndex + 1 ] ].position,
-					faceMesh.vertices [ faceMesh.indices [ baseIndex + 2 ] ].position,
-					intersectionBaryPosition, intersectionDistance )
-			};
-
-			if ( intersects )
-			{
-				distance = intersectionDistance;
-				return true;
-			}
+		case ei::HitSide::X_NEG: hitSide = Sides::left; break;
+		case ei::HitSide::X_POS: hitSide = Sides::right; break;
+		case ei::HitSide::Y_NEG: hitSide = Sides::down; break;
+		case ei::HitSide::Y_POS: hitSide = Sides::up; break;
+		case ei::HitSide::Z_NEG: hitSide = Sides::back; break;
+		case ei::HitSide::Z_POS: hitSide = Sides::forward; break;
 		}
 
-		return false;
+		return intersects;
 	}
 
 	void Voxel::ClearNeighbours ()
