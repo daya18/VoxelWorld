@@ -165,8 +165,11 @@ namespace vw
 
 	void VoxelWorldRenderer::CreateGeometryBuffers ()
 	{
-		std::vector <GLfloat> vertices { impex::InterleaveVertices ( application->voxelModel.GetScene ().vertices ) };
-		std::vector <GLuint> indices { application->voxelModel.GetScene().indices };
+		auto voxelModel { application->voxelModel };
+		voxelModel.Transform ( glm::scale ( glm::identity <glm::mat4> (), { 0.5f, 0.5f, 0.5f } ) );
+
+		std::vector <GLfloat> vertices { impex::InterleaveVertices ( voxelModel.GetScene ().vertices ) };
+		std::vector <GLuint> indices { voxelModel.GetScene().indices };
 
 		glGenBuffers ( 1, &vertexBuffer );
 		glBindBuffer ( GL_ARRAY_BUFFER, vertexBuffer );

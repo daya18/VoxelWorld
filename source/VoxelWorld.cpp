@@ -18,19 +18,18 @@ namespace vw
 		renderer.SetCamera ( camera );
 	}
 
-	void VoxelWorld::AddVoxel ( glm::ivec3 const & index, std::string const & type )
+	void VoxelWorld::AddVoxel ( glm::vec3 const & position, std::string const & type )
 	{
-		auto position { IndexToPosition ( index ) };
 		voxels.insert ( { position, { *this, { position, type } } } );
 		
-		UpdateVoxelNeighbours ();
+		UpdateAllVoxelNeighbours ();
 		renderer.Update ();
 	}
 	
-	void VoxelWorld::Fill ( glm::ivec3 const & fromIndex, glm::ivec3 const & toIndex, std::string const & voxelType )
+	void VoxelWorld::Fill ( glm::vec3 const & fromPosition, glm::vec3 const & toPosition, std::string const & voxelType )
 	{
-		auto min { glm::min ( fromIndex, toIndex ) };
-		auto max { glm::max ( fromIndex, toIndex ) };
+		auto min { glm::min ( fromPosition, toPosition ) };
+		auto max { glm::max ( fromPosition, toPosition ) };
 
 		for ( int x = min.x; x <= max.x; ++x )
 		{
@@ -38,22 +37,31 @@ namespace vw
 			{
 				for ( int z = min.z; z <= max.z; ++z )
 				{
-					auto position { IndexToPosition ( { x, y, z } ) };
+					glm::vec3 position { x, y, z };
 					voxels.insert ( { position, { *this, { position, voxelType } } } );
 				}
 			}
 		}
 
-		UpdateVoxelNeighbours ();
+		UpdateAllVoxelNeighbours ();
 		renderer.Update ();
 	}
 
-	void VoxelWorld::RemoveVoxels ( std::vector <glm::ivec3> const & indices )
+	void VoxelWorld::RemoveVoxels ( std::vector <Voxel *> const & voxels )
 	{
-		for ( auto const & index : indices )
-			voxels.erase ( IndexToPosition ( index ) );
+		std::vector <Voxel *> affectedVoxels;
+		affectedVoxels.reserve ( voxels.size () * 6 );
+
+		for ( auto const & voxel : voxels )
+		{
+			affectedVoxels.insert ( affectedVoxels.end (), voxel->neighbours.begin (), voxel->neighbours.end () );
+			this->voxels.erase ( voxel->GetPosition () );
+		}
 		
-		UpdateVoxelNeighbours ();
+		for ( auto & voxel : affectedVoxels )
+			if ( voxel != nullptr )
+				UpdateVoxelNeighbours ( *voxel );
+
 		renderer.Update ();
 	}
 
@@ -67,29 +75,26 @@ namespace vw
 	{
 		renderer.Render ();
 	}
-
-	void VoxelWorld::UpdateVoxelNeighbours ()
+	
+	void VoxelWorld::UpdateAllVoxelNeighbours ()
 	{
-		for ( auto & [ position, voxel ] : voxels )
-			voxel.ClearNeighbours ();
-
-		for ( auto & [ lvoxelPosition, lvoxel] : voxels )
-		{
-			for ( auto & [rvoxelPosition, rvoxel] : voxels )
-			{
-				for ( auto const & side : sides )
-				{
-					if ( lvoxelPosition + GetDirectionVector ( side ) * voxelScale * 2.0f == rvoxelPosition )
-					{
-						lvoxel.SetNeighbour ( side, rvoxel );
-						rvoxel.SetNeighbour ( GetOppositeSide ( side ), lvoxel );
-					}
-				}
-			}
-		}
+		for ( auto & [position, voxel] : voxels )
+			UpdateVoxelNeighbours ( voxel );
 	}
 
-	Voxel * VoxelWorld::FindVoxel ( glm::ivec3 const & position )
+	void VoxelWorld::UpdateVoxelNeighbours ( Voxel & voxel )
+	{
+		voxel.neighbours = {
+			FindVoxel ( voxel.GetPosition () + GetDirectionVector ( Sides::up ) ),
+			FindVoxel ( voxel.GetPosition () + GetDirectionVector ( Sides::down ) ),
+			FindVoxel ( voxel.GetPosition () + GetDirectionVector ( Sides::left ) ),
+			FindVoxel ( voxel.GetPosition () + GetDirectionVector ( Sides::right ) ),
+			FindVoxel ( voxel.GetPosition () + GetDirectionVector ( Sides::forward ) ),
+			FindVoxel ( voxel.GetPosition () + GetDirectionVector ( Sides::back ) ),
+		};
+	}
+
+	Voxel * VoxelWorld::FindVoxel ( glm::vec3 const & position )
 	{
 		auto voxelIt { voxels.find ( position ) };
 		if ( voxelIt == voxels.end () ) return nullptr;
@@ -106,10 +111,4 @@ namespace vw
 		
 		return outVoxels;
 	}
-
-	glm::vec3 VoxelWorld::IndexToPosition ( glm::ivec3 const & index )
-	{
-		return glm::vec3 { index } * voxelScale * 2.0f;
-	}
-
 }

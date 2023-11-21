@@ -17,12 +17,13 @@ namespace vw
 	{
 		auto voxelsWithinReach { GetVoxelsWithinReach () };
 
+		bool intersects { false };
+		float minIntersectionDistance { std::numeric_limits <float>::max () };
+		Voxel const * intersectingVoxel;
+		Sides minIntersectionSide;
+
 		for ( auto const & voxelWithinReach : voxelsWithinReach )
 		{
-			bool intersects { false };
-			float minIntersectionDistance { std::numeric_limits <float>::max () };
-			Sides minIntersectionSide;
-
 			for ( auto const & side : sides )
 			{
 				float intersectionDistance;
@@ -33,14 +34,16 @@ namespace vw
 					{
 						intersects = true;
 						minIntersectionDistance = intersectionDistance;
+						intersectingVoxel = voxelWithinReach;
 						minIntersectionSide = side;
 					}
 				}
 			}
-/*
-			if ( intersects )
-				std::cout << sideNames.at ( minIntersectionSide ) << std::endl;
-	*/	}
+		}
+
+		if ( intersects )
+			std::cout << glm::to_string ( intersectingVoxel->GetPosition () ) << ' ' << sideNames.at (minIntersectionSide) << std::endl;
+
 	}
 
 	std::vector <Voxel const *> VoxelWorldRaycaster::GetVoxelsWithinReach () const

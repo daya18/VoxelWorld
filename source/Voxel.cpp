@@ -8,22 +8,25 @@
 namespace vw
 {
 	Voxel::Voxel ( VoxelWorld & world, Definition const & definition )
-	:	world ( & world ), 
-		position ( definition.position ), 
+	: 
+		world ( & world ),
+		position ( definition.position ),
 		type ( definition.type ),
 		transform ( glm::translate ( glm::identity <glm::mat4> (), position ) ),
 		worldSpaceModel ( world.GetApplication ().GetVoxelModel () )
 	{
+		glm::mat4 scaleMatrix { glm::scale ( glm::identity <glm::mat4> (), { 0.5f, 0.5f, 0.5f } ) };
+		worldSpaceModel.Transform ( transform * scaleMatrix );
 	}
 
 	bool Voxel::CheckNeighbour ( Sides side ) const
 	{
-		return neighbours [ static_cast <int> ( side ) ] != nullptr;
+		return neighbours [ static_cast < int > ( side ) ] != nullptr;
 	}
 
 	bool Voxel::CheckFaceIntersection ( Sides side, float & distance ) const
 	{
-		auto & faceMesh { worldSpaceModel.GetFaceMesh (side) };
+		auto & faceMesh { worldSpaceModel.GetFaceMesh ( side ) };
 
 		for ( int triangleIndex { 0 }; triangleIndex < 2; ++triangleIndex )
 		{
@@ -51,7 +54,7 @@ namespace vw
 
 		return false;
 	}
-	
+
 	void Voxel::ClearNeighbours ()
 	{
 		for ( auto & neighbour : neighbours )

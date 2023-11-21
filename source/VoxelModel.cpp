@@ -5,17 +5,6 @@ namespace vw
 	VoxelModel::VoxelModel ()
 		: scene ( impex::LoadSceneFromFile ( "model/Voxel.obj" ) )
 	{
-		auto orderedMeshNames = {
-			"Top_Face",
-			"Bottom_Face",
-			"Left_Face",
-			"Right_Face",
-			"Front_Face",
-			"Back_Face"
-		};
-
-		for ( auto const & orderedMeshName : orderedMeshNames )
-			orderedMeshes.push_back ( scene.meshes.at ( orderedMeshName ) );
 	}
 	
 	impex::Mesh const & VoxelModel::GetFaceMesh ( Sides side ) const
@@ -32,10 +21,22 @@ namespace vw
 
 	}
 
-	VoxelModel VoxelModel::Transform ( glm::mat4 const & transformMatrix ) const
+	VoxelModel & VoxelModel::Transform ( glm::mat4 const & transformMatrix )
 	{
-		VoxelModel outModel { *this };
-		outModel.scene = impex::TransformScene ( outModel.scene, transformMatrix );
-		return outModel;
+		scene = impex::TransformScene ( scene, transformMatrix );
+
+		auto orderedMeshNames = {
+			"Top_Face",
+			"Bottom_Face",
+			"Left_Face",
+			"Right_Face",
+			"Front_Face",
+			"Back_Face"
+		};
+
+		for ( auto const & orderedMeshName : orderedMeshNames )
+			orderedMeshes.push_back ( scene.meshes.at ( orderedMeshName ) );
+		
+		return *this;
 	}
 }

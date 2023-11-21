@@ -12,7 +12,7 @@ namespace vw
 
 		impex::Mesh const & GetFaceMesh ( Sides side ) const;
 		impex::Scene const & GetScene () const;
-		VoxelModel Transform ( glm::mat4 const & ) const;
+		VoxelModel & Transform ( glm::mat4 const & );
 
 	private:
 		impex::Scene scene;

@@ -15,11 +15,11 @@ namespace vw
 	public:
 		VoxelWorld ( Application & );
 
-		void AddVoxel ( glm::ivec3 const & position, std::string const & type );
-		void Fill ( glm::ivec3 const & from, glm::ivec3 const & to, std::string const & voxelType );
-		void RemoveVoxels ( std::vector <glm::ivec3> const & positions );
+		void AddVoxel ( glm::vec3 const & position, std::string const & type );
+		void Fill ( glm::vec3 const & from, glm::vec3 const & to, std::string const & voxelType );
+		void RemoveVoxels ( std::vector <Voxel *> const & voxels );
 
-		Voxel * FindVoxel ( glm::ivec3 const & position );
+		Voxel * FindVoxel ( glm::vec3 const & position );
 
 		void Update ( float deltaTime );
 		void Render ();
@@ -30,8 +30,8 @@ namespace vw
 		Application const & GetApplication () const;
 
 	private:
-		glm::vec3 IndexToPosition ( glm::ivec3 const & );
-		void UpdateVoxelNeighbours ();
+		void UpdateAllVoxelNeighbours ();
+		void UpdateVoxelNeighbours ( Voxel & );
 
 		float voxelScale = 1.0f;
 
