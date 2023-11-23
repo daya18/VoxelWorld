@@ -45,7 +45,7 @@ namespace vw
 						auto position { raycaster.GetTargetVoxel ()->GetPosition () 
 							+ GetDirectionVector ( raycaster.GetTargetVoxelSide () ) };
 
-						voxelWorld.AddVoxel ( position, "Grass" );
+						voxelWorld.AddVoxel ( position, "Dirt" );
 					}
 				}
 				nextBlockPlaceBreakCountdown -= deltaTime;

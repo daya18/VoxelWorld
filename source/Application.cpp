@@ -10,7 +10,9 @@ namespace vw
 		renderContext ( window ),
 		
 		voxelTypeTextures {
-			{ "Grass", CreateTextureFromFile ( "image/TestBlockTexture.png" ) }
+			{ "Grass", CreateTextureFromFile ( "image/Grass.png" ) },
+			{ "Dirt", CreateTextureFromFile ( "image/Dirt.png" ) },
+			{ "Stone", CreateTextureFromFile ( "image/Stone.png" ) }
 		},
 
 		world ( *this )
