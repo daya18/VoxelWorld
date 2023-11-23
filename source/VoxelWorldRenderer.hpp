@@ -37,6 +37,7 @@ namespace vw
 		void SetView ( glm::mat4 const & );
 		void SetProjection ( glm::mat4 const & );
 
+		// Initialization helpers
 		void CreateGeometryBuffers ();
 		GLuint CreateShader ( std::string const & filePath, GLenum type );
 		void CreateShaderProgram ();
@@ -59,6 +60,7 @@ namespace vw
 		GLuint projectionMatrixUniformLocation;
 		GLuint colorUniformLocation;
 
+		std::unordered_map <Voxel const *, unsigned int> voxelTransformIndices;
 		GLuint transformBuffer;
 		
 						// Texture

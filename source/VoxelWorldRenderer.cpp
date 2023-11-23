@@ -22,7 +22,7 @@ namespace vw
 		CreateVertexArray ();
 
 		glBindVertexArray ( vertexArray );
-		glBindVertexBuffer ( 0, vertexBuffer, 0, sizeof ( GLfloat ) * ( 3 + 2 ) );
+		glBindVertexBuffer ( 0, vertexBuffer, 0, sizeof ( GLfloat ) * ( 3 + 2 + 3 ) );
 
 		CreateShaderProgram ();
 
@@ -91,11 +91,19 @@ namespace vw
 	
 	void VoxelWorldRenderer::Update ()
 	{
+		std::cout << "Renderer syncing" << std::endl;
+
 		std::vector <glm::mat4> voxelTransforms;
 		voxelTransforms.reserve ( world->voxels.size () );
 
+		voxelTransformIndices.reserve ( world->voxels.size () );
+
+		int transformIndex { 0 };
 		for ( auto & [voxelPos, voxel] : world->voxels )
+		{
 			voxelTransforms.push_back ( voxel.GetTransformMatrix () );
+			voxelTransformIndices [ &voxel ] = transformIndex ++;
+		}
 
 		glDeleteBuffers ( 1, &transformBuffer );
 		transformBuffer = CreateBufferWithData ( voxelTransforms, GL_UNIFORM_BUFFER );
@@ -142,6 +150,16 @@ namespace vw
 
 		// Bind transform buffer
 		glBindBufferBase ( GL_UNIFORM_BUFFER, 0, transformBuffer );
+
+		auto uniformLoc { glGetUniformLocation ( shaderProgram, "u_highligtedVoxelTransformIndex" ) };
+		
+		if ( world->raycaster.GetTargetVoxel () != nullptr )
+		{
+			auto transformIndex { voxelTransformIndices.at ( world->raycaster.GetTargetVoxel () ) };
+			glUniform1i ( uniformLoc, static_cast < GLint > ( transformIndex ) );
+		}
+		else
+			glUniform1i ( uniformLoc, -1 );
 
 		for ( auto const & [texture, faceBatches] : batches )
 		{
@@ -220,6 +238,10 @@ namespace vw
 		glEnableVertexAttribArray ( 1 );
 		glVertexAttribFormat ( 1, 2, GL_FLOAT, GL_FALSE, sizeof ( GLfloat ) * 3 );
 		glVertexAttribBinding ( 1, 0 );
+
+		glEnableVertexAttribArray ( 2 );
+		glVertexAttribFormat ( 2, 3, GL_FLOAT, GL_FALSE, sizeof ( GLfloat ) * ( 3 + 2 ) );
+		glVertexAttribBinding ( 2, 0 );
 	}
 
 	GLuint VoxelWorldRenderer::GetFaceIndexOffset ( Sides face )

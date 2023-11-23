@@ -76,7 +76,8 @@ namespace vw::impex
 		{
 			auto outVertex = { 
 				vertex.position.x, vertex.position.y, vertex.position.z,
-				vertex.textureCoordinates.x, vertex.textureCoordinates.y
+				vertex.textureCoordinates.x, vertex.textureCoordinates.y,
+				vertex.normal.x, vertex.normal.y, vertex.normal.z
 			};
 
 			outVertices.insert ( outVertices.end (), outVertex.begin (), outVertex.end () );

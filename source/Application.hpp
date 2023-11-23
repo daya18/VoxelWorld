@@ -14,6 +14,8 @@ namespace vw
 		Application ( Application const & ) = delete;
 		Application ( Application && ) = delete;
 
+		~Application ();
+
 		Application & operator = ( Application const & ) = delete;
 		Application & operator = ( Application && ) = delete;
 

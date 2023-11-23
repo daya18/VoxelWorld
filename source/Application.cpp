@@ -18,6 +18,17 @@ namespace vw
 		window.EnableRawMouseInput ();
 	}
 
+	Application::~Application ()
+	{
+		std::vector <GLuint> textures;
+		textures.reserve ( voxelTypeTextures.size () + 1 );
+		
+		for ( auto const & voxelTypeTexture : voxelTypeTextures )
+			textures.push_back ( voxelTypeTexture.second );
+
+		glDeleteTextures ( textures.size (), textures.data () );
+	}
+
 	void Application::Run ()
 	{
 		lastFrameTime = std::chrono::steady_clock::now ();
