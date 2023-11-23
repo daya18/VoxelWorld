@@ -1,6 +1,5 @@
 #include "VoxelWorld.hpp"
 
-#include "Renderer.hpp"
 #include "Window.hpp"
 #include "Application.hpp"
 #include "Core.hpp"

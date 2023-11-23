@@ -29,6 +29,7 @@ namespace vw
 		void DisableRawMouseInput ();
 
 		glm::vec2 const & GetMouseDelta () const;
+		void InitImgui () const;
 
 	private:
 		static Window * GetWindow ( GLFWwindow * );

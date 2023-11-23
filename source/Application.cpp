@@ -7,7 +7,7 @@ namespace vw
 	Application::Application ()
 	: 
 		window { "Voxel World", { 1280, 720 } },
-		renderer ( window ),
+		renderContext ( window ),
 		
 		voxelTypeTextures {
 			{ "Grass", CreateTextureFromFile ( "image/TestBlockTexture.png" ) }
@@ -38,13 +38,21 @@ namespace vw
 				break;
 			}
 
-			window.HandleInput ();
-
-			world.Update ( deltaTime );
-
-			renderer.Begin ();
-			world.Render ();
-			renderer.End ();
+			Update ( deltaTime );
+			Render ();
 		}
+	}
+
+	void Application::Update ( float deltaTime )
+	{
+		window.HandleInput ();
+		world.Update ( deltaTime );
+	}
+
+	void Application::Render ()
+	{
+		renderContext.Begin ();
+		world.Render ();
+		renderContext.End ();
 	}
 }

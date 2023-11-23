@@ -132,4 +132,8 @@ namespace vw
 		}
 	}
 
+	void Window::InitImgui () const 
+	{
+		ImGui_ImplGlfw_InitForOpenGL ( window, true );
+	}
 }

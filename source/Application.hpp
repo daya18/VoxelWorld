@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Window.hpp"
-#include "Renderer.hpp"
+#include "RenderContext.hpp"
 #include "World.hpp"
 #include "VoxelModel.hpp"
 
@@ -22,10 +22,13 @@ namespace vw
 		VoxelModel const & GetVoxelModel () const;
 
 	private:
+		void Update ( float deltaTime );
+		void Render ();
+
 		bool quit { false };
 		VoxelModel voxelModel;
 		Window window;
-		Renderer renderer;
+		RenderContext renderContext;
 		std::unordered_map <std::string, GLuint> voxelTypeTextures;
 		World world;
 		std::chrono::steady_clock::time_point lastFrameTime;

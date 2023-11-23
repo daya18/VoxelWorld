@@ -17,6 +17,9 @@ namespace vw
 		VoxelWorld & GetVoxelWorld ();
 
 	private:
+		void RenderGUI ();
+		void DrawCrosshair ();
+
 		Application * application;
 		VoxelWorld voxelWorld;
 		Player player;

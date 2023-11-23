@@ -5,11 +5,12 @@ namespace vw
 	class Window;
 	class Camera;
 
-	class Renderer
+	class RenderContext
 	{
 	public:
-		Renderer ( Window & window );
-		
+		RenderContext ( Window & window );
+		~RenderContext ();
+
 		void Begin ();
 		void End ();
 
@@ -18,5 +19,6 @@ namespace vw
 			GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar * message, const void * userParam );
 
 		Window * window;
+		ImGuiContext * imguiContext;
 	};
 }

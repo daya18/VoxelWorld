@@ -26,14 +26,26 @@ add_executable ( VoxelWorld )
 
 set_source_files_properties ( external/glad/src/glad.c PROPERTIES LANGUAGE CXX)
 
+target_compile_definitions ( VoxelWorld PRIVATE
+	IMGUI_DEFINE_MATH_OPERATORS
+)
+
 target_sources ( VoxelWorld PRIVATE 
 	external/glad/src/glad.c
 	
+	external/imgui/imgui_demo.cpp
+	external/imgui/imgui_draw.cpp
+	external/imgui/imgui_widgets.cpp
+	external/imgui/imgui_tables.cpp
+	external/imgui/imgui.cpp
+	external/imgui/backends/imgui_impl_glfw.cpp
+	external/imgui/backends/imgui_impl_opengl3.cpp
+
 	"source/Main.cpp"		
 	"source/Window.cpp"
 	"source/Application.cpp" 
 	"source/VoxelWorldRenderer.cpp"
-	"source/Renderer.cpp" 
+	"source/RenderContext.cpp" 
 	"source/VoxelWorld.cpp" 
 	"source/SignalEmitter.cpp"
 	"source/Camera.cpp"  
@@ -49,6 +61,7 @@ target_include_directories ( VoxelWorld PRIVATE
 	external
 	external/OBJ-Loader/Source
 	external/Epsilon-Intersection/include
+	external/imgui
 )
 
 target_precompile_headers ( VoxelWorld PRIVATE source/vwpch.hpp )
