@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <array>
 #include <chrono>
+#include <unordered_set>
 
 #include <glad/glad.h>
 

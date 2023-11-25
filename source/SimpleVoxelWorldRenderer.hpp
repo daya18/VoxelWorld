@@ -8,16 +8,16 @@ namespace vw
 	class Application;
 	class Camera;
 
-	class VoxelWorldRenderer
+	class SimpleVoxelWorldRenderer
 	{
 	public:
-		VoxelWorldRenderer ( Application &, VoxelWorld & );
-		VoxelWorldRenderer ( VoxelWorldRenderer const & ) = delete;
-		VoxelWorldRenderer ( VoxelWorldRenderer && );
-		~VoxelWorldRenderer ();
+		SimpleVoxelWorldRenderer ( Application &, VoxelWorld & );
+		SimpleVoxelWorldRenderer ( SimpleVoxelWorldRenderer const & ) = delete;
+		SimpleVoxelWorldRenderer ( SimpleVoxelWorldRenderer && );
+		~SimpleVoxelWorldRenderer ();
 
-		VoxelWorldRenderer & operator = ( VoxelWorldRenderer const & ) = delete;
-		VoxelWorldRenderer & operator = ( VoxelWorldRenderer && );
+		SimpleVoxelWorldRenderer & operator = ( SimpleVoxelWorldRenderer const & ) = delete;
+		SimpleVoxelWorldRenderer & operator = ( SimpleVoxelWorldRenderer && );
 
 		void SetCamera ( Camera & );
 
@@ -25,34 +25,27 @@ namespace vw
 		float GetVoxelScale () const;
 
 		void AddVoxels ( std::vector <Voxel *> const & );
-		void UpdateVoxels ( std::vector <Voxel *> const & );
 		void RemoveVoxels ( std::vector <Voxel *> const & );
 
-		void Update ();
 		void Render ();
 
 	private:
-		void UpdateBatches ();
-		std::vector <glm::mat4> GetVoxelTransforms ( std::vector <Voxel *> const & );
-		
+		void RenderOutline ( glm::mat4 const & transform );
+		void Update ();
+
 		struct VoxelData
 		{
 			glm::mat4 transform;
 		};
-
-		struct Batch
-		{
-			unsigned int voxelCount;
-			MapBuffer <Voxel *, glm::vec4> transformIndexBuffer;
-		};
 		
+		std::vector <glm::mat4> GetVoxelTransforms ( std::vector <Voxel *> const & );
+
 		GLuint GetFaceIndexOffset ( Sides );
 		void SetView ( glm::mat4 const & );
 		void SetProjection ( glm::mat4 const & );
 
 		// Initialization helpers
 		void CreateGeometryBuffers ();
-		GLuint CreateShader ( std::string const & filePath, GLenum type );
 		void CreateShaderProgram ();
 		void CreateVertexArray ();
 
@@ -63,8 +56,13 @@ namespace vw
 		GLuint vertexBuffer;
 		GLuint indexBuffer;
 		GLuint shaderProgram;
+		GLuint simpleShaderProgram;
 		GLuint vertexArray;
 		
+		GLuint outlineVertexBuffer;
+		GLuint outlineIndexBuffer;
+		GLuint outlineIndexCount;
+
 		VoxelWorld * voxelWorld;
 		
 		// Uniform locations
@@ -72,13 +70,10 @@ namespace vw
 		GLuint viewMatrixUniformLocation;
 		GLuint projectionMatrixUniformLocation;
 		GLuint colorUniformLocation;
-
-		std::unordered_map <Voxel const *, unsigned int> voxelTransformIndices;
-		GLuint transformBuffer;
 		
-						// Texture
-		std::unordered_map <GLuint, std::unordered_map <Sides, Batch> >batches;
-		MapBuffer <Voxel *, VoxelData> voxelBuffer;
+		GLuint voxelBuffer { 0 };
+		GLuint voxelCount { 0 };
+		//std::unordered_map <std::string, 
 		
 	};
 }

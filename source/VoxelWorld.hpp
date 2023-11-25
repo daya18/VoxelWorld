@@ -2,8 +2,8 @@
 
 #include "Voxel.hpp"
 #include "Camera.hpp"
-#include "VoxelWorldRenderer.hpp"
 #include "VoxelWorldRaycaster.hpp"
+#include "SimpleVoxelWorldRenderer.hpp"
 
 namespace vw
 {
@@ -25,10 +25,12 @@ namespace vw
 		void Render ();
 
 		std::vector <Voxel *> GetVoxels ();
+		std::vector <Voxel *> GetVoxels ( glm::vec3 const & centre, float radius );
 
 		float GetVoxelScale () const;
 		Application const & GetApplication () const;
 		VoxelWorldRaycaster & GetRaycaster ();
+		unsigned int GetVoxelCount () const;
 
 	private:
 		void UpdateAllVoxelNeighbours ();
@@ -41,11 +43,12 @@ namespace vw
 		Camera camera;
 		std::unordered_map <glm::vec3, Voxel> voxels;
 
-		VoxelWorldRenderer renderer;
+		SimpleVoxelWorldRenderer simpleRenderer;
 		VoxelWorldRaycaster raycaster;
 
 		friend class Voxel;
 		friend class VoxelWorldRenderer;
+		friend class SimpleVoxelWorldRenderer;
 		friend class VoxelWorldRaycaster;
 	};
 	
@@ -53,4 +56,6 @@ namespace vw
 	inline float VoxelWorld::GetVoxelScale () const { return voxelScale; }
 	inline Application const & VoxelWorld::GetApplication () const { return *application; }
 	inline VoxelWorldRaycaster & VoxelWorld::GetRaycaster () { return raycaster; }
+	inline unsigned int VoxelWorld::GetVoxelCount () const { return voxels.size (); }
+
 }

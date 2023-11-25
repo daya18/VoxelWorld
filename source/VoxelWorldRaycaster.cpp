@@ -6,7 +6,7 @@
 
 namespace vw
 {
-	float const VoxelWorldRaycaster::rayLength { 10.0f };
+	float const VoxelWorldRaycaster::rayLength { 4.0f };
 
 	VoxelWorldRaycaster::VoxelWorldRaycaster ( Application const & application, VoxelWorld & world )
 		: application ( & application ), world ( & world )
@@ -45,16 +45,20 @@ namespace vw
 
 	std::vector <Voxel *> VoxelWorldRaycaster::GetVoxelsWithinReach () const
 	{
+		return world->GetVoxels ( glm::round ( world->camera.GetPosition () ), rayLength );
+
 		std::vector <Voxel *> voxels;
 		voxels.reserve ( world->voxels.size () );
 
-		for ( auto & [voxelPosition, voxel] : world->voxels )
-		{
-			auto cameraVoxelDistance { glm::distance ( world->camera.GetPosition (), voxel.GetPosition () ) };
+		auto cameraPosition { glm::round ( world->camera.GetPosition () ) };
 
-			if ( cameraVoxelDistance < rayLength )
-				voxels.push_back ( & voxel );
-		}
+		//for ( auto & [voxelPosition, voxel] : world->voxels )
+		//{
+		//	auto cameraVoxelDistance { glm::distance ( world->camera.GetPosition (), voxel.GetPosition () ) };
+
+		//	if ( cameraVoxelDistance < rayLength )
+		//		voxels.push_back ( & voxel );
+		//}
 
 		voxels.shrink_to_fit ();
 		return voxels;

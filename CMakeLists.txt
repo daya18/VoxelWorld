@@ -54,7 +54,7 @@ target_sources ( VoxelWorld PRIVATE
 	"source/World.cpp"  
 	 
 	
- "source/VoxelWorldRaycaster.cpp"    "source/impex.cpp" "source/VoxelModel.cpp" "source/Core.cpp"  "source/Player.cpp")
+ "source/VoxelWorldRaycaster.cpp"    "source/impex.cpp" "source/VoxelModel.cpp" "source/Core.cpp"  "source/Player.cpp" "source/buffer/MapBuffer.cpp"  "source/buffer/VectorBuffer.cpp" "source/SimpleVoxelWorldRenderer.cpp")
 
 target_include_directories ( VoxelWorld PRIVATE 
 	external/glad/include

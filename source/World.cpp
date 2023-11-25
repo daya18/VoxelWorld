@@ -10,14 +10,17 @@ namespace vw
 		voxelWorld ( application ),
 		player ( *this )
 	{
-		voxelWorld.Fill ( { -15, 0, -15 }, { 15, 0, 15 }, "Grass" );
-		//Fill ( { -5, 0, -5 }, { 5, 0, 5 }, "Grass" );
+		voxelWorld.Fill ( { -20, -20, -20 }, { 20, 0, 20 }, "Grass" );
+		//voxelWorld.Fill ( { -5, -5, -5 }, { 5, 0, 5 }, "Grass" );
 
-		/*AddVoxel ( { 0, 0, 0 }, "Grass" );
-		AddVoxel ( { 1, 0, 0 }, "Grass" );
-		AddVoxel ( { 2, 0, 0 }, "Grass" );*/
+		//voxelWorld.AddVoxel ( { 0, 0, 0 }, "Grass" );
+		/*voxelWorld.AddVoxel ( { 1, 0, 0 }, "Log" );
+		voxelWorld.AddVoxel ( { 0, 1, 0 }, "Log" );
+		voxelWorld.AddVoxel ( { 1, 1, 0 }, "Log" );*/
 
 		//RemoveVoxels ( { { 2, 0, 0 } } );
+		
+		std::cout << "Voxel count: " << voxelWorld.GetVoxelCount () << std::endl;
 	}
 
 	void World::Update ( float delta )

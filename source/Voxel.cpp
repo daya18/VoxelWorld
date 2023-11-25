@@ -61,4 +61,17 @@ namespace vw
 	{
 		neighbours [ static_cast < int > ( side ) ] = &neighbour;
 	}
+
+	std::vector <Voxel *> Voxel::GetNeighbours () const
+	{
+		std::vector <Voxel *> neighbours;
+		neighbours.reserve ( 6 );
+
+		for ( auto const & neighbour : this->neighbours )
+			if ( neighbour )
+				neighbours.push_back ( neighbour );
+		
+		return neighbours;
+	}
+
 }

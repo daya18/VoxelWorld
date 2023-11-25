@@ -5,29 +5,32 @@
 namespace vw
 {
 	Application::Application ()
-	: 
+		:
 		window { "Voxel World", { 1280, 720 } },
 		renderContext ( window ),
-		
+
 		voxelTypeTextures {
 			{ "Grass", CreateTextureFromFile ( "image/Grass.png" ) },
 			{ "Dirt", CreateTextureFromFile ( "image/Dirt.png" ) },
-			{ "Stone", CreateTextureFromFile ( "image/Stone.png" ) }
+			{ "Stone", CreateTextureFromFile ( "image/Stone.png" ) },
+			{ "Log", CreateTextureFromFile ( "image/Log.png" ) },
+			{ "Plank", CreateTextureFromFile ( "image/Plank.png" ) }
 		},
 
 		world ( *this )
 	{
-		window.EnableRawMouseInput ();
+		SetPaused ( false );
+
+		window.AddKeyDownCallback ( [this] ( int key ) {
+			if ( key == GLFW_KEY_ESCAPE )
+				SetPaused ( !paused );
+		} );
+
 	}
 
 	Application::~Application ()
 	{
-		std::vector <GLuint> textures;
-		textures.reserve ( voxelTypeTextures.size () + 1 );
-		
-		for ( auto const & voxelTypeTexture : voxelTypeTextures )
-			textures.push_back ( voxelTypeTexture.second );
-
+		auto textures { GetValues <GLuint> ( voxelTypeTextures ) };
 		glDeleteTextures ( textures.size (), textures.data () );
 	}
 
@@ -59,13 +62,42 @@ namespace vw
 	void Application::Update ( float deltaTime )
 	{
 		window.HandleInput ();
+		
+		if ( paused ) 
+			return;
+
 		world.Update ( deltaTime );
 	}
 
 	void Application::Render ()
 	{
 		renderContext.Begin ();
+		
 		world.Render ();
+		
+		ImGui::ShowMetricsWindow ();
+
+		if ( paused )
+		{
+			ImGui::Begin ("Pause Menu", nullptr, ImGuiWindowFlags_AlwaysAutoResize );
+			
+			ImVec2 buttonSize { 150.0f, 50.0f };
+
+			if ( ImGui::Button ( "Resume", buttonSize ) )
+				SetPaused ( false );
+
+			if ( ImGui::Button ( "Quit", buttonSize ) )
+				quit = true;
+
+			ImGui::End ();
+		}
+
 		renderContext.End ();
+	}
+
+	void Application::SetPaused ( bool paused )
+	{
+		this->paused = paused;
+		window.SetRawMouseInput ( !paused );
 	}
 }

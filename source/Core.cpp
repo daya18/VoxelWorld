@@ -83,4 +83,35 @@ namespace vw
 
 		return texture;
 	}
+
+	GLuint CreateShader ( std::string const & filePath, GLenum type )
+	{
+		auto shader { glCreateShader ( type ) };
+
+		std::string data { ( std::ostringstream {} << std::ifstream { filePath }.rdbuf () ).str () };
+
+		GLchar const * shaderData { data.data () };
+		GLint length { static_cast < GLint > ( data.size () ) };
+
+		glShaderSource ( shader, 1, &shaderData, &length );
+		glCompileShader ( shader );
+		return shader;
+	}
+
+	GLuint CreateShaderProgram ( std::string const & vertexShaderFilePath, std::string const & fragmentShaderFilePath )
+	{
+		GLuint vertexShader { CreateShader ( vertexShaderFilePath, GL_VERTEX_SHADER ) };
+		GLuint fragmentShader { CreateShader ( fragmentShaderFilePath, GL_FRAGMENT_SHADER ) };
+
+		GLuint shaderProgram = glCreateProgram ();
+
+		glAttachShader ( shaderProgram, vertexShader );
+		glAttachShader ( shaderProgram, fragmentShader );
+		glLinkProgram ( shaderProgram );
+
+		glDeleteShader ( vertexShader );
+		glDeleteShader ( fragmentShader );
+
+		return shaderProgram;
+	}
 }

@@ -16,6 +16,7 @@ namespace vw
 		void Update ();
 		Voxel * GetTargetVoxel () const;
 		Sides GetTargetVoxelSide () const;
+		void Clear ();
 
 	private:
 		std::vector <Voxel *> GetVoxelsWithinReach () const;

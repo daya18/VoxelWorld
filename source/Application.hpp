@@ -24,10 +24,12 @@ namespace vw
 		VoxelModel const & GetVoxelModel () const;
 
 	private:
+		void SetPaused ( bool paused );
 		void Update ( float deltaTime );
 		void Render ();
 
 		bool quit { false };
+		bool paused;
 		VoxelModel voxelModel;
 		Window window;
 		RenderContext renderContext;
@@ -37,6 +39,7 @@ namespace vw
 
 		friend class VoxelWorld;
 		friend class VoxelWorldRenderer;
+		friend class SimpleVoxelWorldRenderer;
 	};
 
 	// Implementation

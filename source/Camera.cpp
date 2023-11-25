@@ -10,7 +10,7 @@ namespace vw
 	Camera::Camera ( Window & window )
 	:
 		window ( & window ),
-		position ( 0.0f, 0.0f, -5.0f ),
+		position ( 0.0f, 0.0f, 5.0f ),
 		lookDirection ( 0.0f, 0.0f, -1.0f )
 	{
 		UpdateViewMatrix ();

@@ -13,7 +13,7 @@
 namespace vw
 {
 	VoxelWorldRenderer::VoxelWorldRenderer ( Application & application, VoxelWorld & world )
-	:
+		:
 		destroyResources ( true ),
 		application ( & application ),
 		world ( & world )
@@ -88,32 +88,74 @@ namespace vw
 		SetView ( camera.GetViewMatrix () );
 		SetProjection ( camera.GetProjectionMatrix () );
 	}
-	
-	void VoxelWorldRenderer::Update ()
+
+	void VoxelWorldRenderer::AddVoxels ( std::vector <Voxel *> const & newVoxels )
 	{
-		std::cout << "Renderer syncing" << std::endl;
+		// Insert new voxel datas to voxel buffer
+		std::vector <std::pair <Voxel *, VoxelData>> newVoxelDatas;
+		newVoxelDatas.reserve ( newVoxels.size () );
 
-		std::vector <glm::mat4> voxelTransforms;
-		voxelTransforms.reserve ( world->voxels.size () );
+		for ( auto newVoxel : newVoxels )
+			newVoxelDatas.push_back ( { newVoxel, { newVoxel->GetTransformMatrix () } } );
 
-		voxelTransformIndices.reserve ( world->voxels.size () );
+		unsigned int voxelIndex { voxelBuffer.Insert ( newVoxelDatas ) };
+		
 
-		int transformIndex { 0 };
-		for ( auto & [voxelPos, voxel] : world->voxels )
+
+		//for ( auto const & newVoxel : newVoxels )
+		//{
+		//	auto texture { application->voxelTypeTextures.at ( newVoxel->GetType () ) };
+
+		//	for ( auto const & side : sides )
+		//		batches [ texture ][ side ].transformIndexBuffer.Insert ( { { newVoxel,
+		//			glm::vec4 { static_cast < float > ( voxelIndex ) } } } );
+		//}
+	}
+	
+	void VoxelWorldRenderer::UpdateVoxels ( std::vector <Voxel *> const & newVoxels )
+	{
+		//if ( newVoxels.empty () ) return;
+
+		std::unordered_map <GLuint, std::unordered_map <Sides, std::vector <std::pair <Voxel *, glm::vec4> > > >
+			batchTransformIndices;
+
+		for ( auto voxel : newVoxels )
 		{
-			voxelTransforms.push_back ( voxel.GetTransformMatrix () );
-			voxelTransformIndices [ &voxel ] = transformIndex ++;
+			auto texture { application->voxelTypeTextures.at ( voxel->GetType () ) };
+
+			for ( auto const & side : sides )
+			{
+				if ( voxel->CheckNeighbour ( side ) )
+					continue;
+
+				auto voxelIndex { static_cast < float > ( voxelBuffer.GetValueIndex ( voxel ) ) };
+				batchTransformIndices [ texture ][ side ].push_back ( { voxel, glm::vec4 { voxelIndex } } );
+			}
 		}
 
-		glDeleteBuffers ( 1, &transformBuffer );
-		transformBuffer = CreateBufferWithData ( voxelTransforms, GL_UNIFORM_BUFFER );
+		for ( auto & [texture, faceBatches] : batches )
+			for ( auto & [face, batch] : faceBatches )
+				batch.transformIndexBuffer.Erase ( newVoxels );
 
+		for ( auto const & [type, sideIndices] : batchTransformIndices )
+			for ( auto const & [side, indices] : sideIndices )
+				batches [ type ][ side ].transformIndexBuffer.Insert ( indices );
+	}
+
+	void VoxelWorldRenderer::RemoveVoxels ( std::vector <Voxel *> const & voxels )
+	{
+		voxelBuffer.Erase ( voxels );
+
+		//for ( auto & [texture, faceBatches] : batches )
+		//	for ( auto & [face, batch] : faceBatches )
+		//		batch.transformIndexBuffer.Erase ( voxels );
+		//
 		batches.clear ();
 
-		std::unordered_map <GLuint, std::unordered_map <Sides, std::vector <glm::vec4> > > batchTransformIndices;
+		std::unordered_map <GLuint, std::unordered_map <Sides, std::vector <std::pair <Voxel *, glm::vec4> > > >
+			batchTransformIndices;
 
-		float voxelIndex { 0 };
-		for ( auto & [voxelPos, voxel] : world->voxels )
+		for ( auto & [ pos, voxel ] : world->voxels )
 		{
 			auto texture { application->voxelTypeTextures.at ( voxel.GetType () ) };
 
@@ -122,22 +164,82 @@ namespace vw
 				if ( voxel.CheckNeighbour ( side ) )
 					continue;
 
-				batchTransformIndices [ texture ] [ side ].push_back ( glm::vec4 { voxelIndex } );
+				auto voxelIndex { static_cast < float > ( voxelBuffer.GetValueIndex ( &voxel ) ) };
+				batchTransformIndices [ texture ][ side ].push_back ( { &voxel, glm::vec4 { voxelIndex } } );
 			}
-
-			++voxelIndex;
 		}
 
 		for ( auto const & [type, sideIndices] : batchTransformIndices )
-		{
 			for ( auto const & [side, indices] : sideIndices )
-			{
-				auto & batch { batches [ type ][ side ] };
-				glDeleteBuffers ( 1, & ( batch.transformIndexBuffer ) );
-				batch.transformIndexBuffer = CreateBufferWithData ( indices, GL_UNIFORM_BUFFER );
-				batch.voxelCount = indices.size ();
-			}
-		}
+				batches [ type ][ side ].transformIndexBuffer.Insert ( indices );
+	}
+
+	void VoxelWorldRenderer::UpdateBatches ()
+	{
+		
+	}
+
+	void VoxelWorldRenderer::Update ()
+	{
+		/*auto voxel1 { &world->voxels.begin ()->second };
+		auto voxel2 { &(world->voxels.begin ()++)->second };
+		auto voxel3 { &(world->voxels.begin () ++ ++ )->second };
+
+		voxelBuffer.AddVoxels ( { voxel1 } );
+		voxelBuffer.AddVoxels ( { voxel2 } );
+		voxelBuffer.AddVoxels ( { voxel3 } );
+
+		voxelBuffer.RemoveVoxel ( voxel2 );*/
+
+		std::cout << "Renderer syncing" << std::endl;
+
+		//std::vector <glm::mat4> voxelTransforms;
+		//voxelTransforms.reserve ( world->voxels.size () );
+
+		//voxelTransformIndices.clear ();
+		//voxelTransformIndices.reserve ( world->voxels.size () );
+
+		//int transformIndex { 0 };
+		//for ( auto & [voxelPos, voxel] : world->voxels )
+		//{
+		//	voxelTransforms.push_back ( voxel.GetTransformMatrix () );
+		//	voxelTransformIndices.insert ( { &voxel, transformIndex ++ } );
+		//}
+
+		//glDeleteBuffers ( 1, &transformBuffer );
+		//transformBuffer = CreateBufferWithData ( voxelTransforms, GL_UNIFORM_BUFFER );
+
+	//	batches.clear ();
+
+		//std::unordered_map <GLuint, std::unordered_map <Sides, std::vector <glm::vec4> > > batchTransformIndices;
+
+		//float voxelIndex { 0 };
+		//for ( auto & [voxelPos, voxel] : world->voxels )
+		//{
+		//	auto texture { application->voxelTypeTextures.at ( voxel.GetType () ) };
+
+		//	for ( auto const & side : sides )
+		//	{
+		//		if ( voxel.CheckNeighbour ( side ) )
+		//			continue;
+
+		//		auto voxelIndex { static_cast < float > ( voxelBuffer.GetValueIndex ( &voxel ) ) };
+		//		batchTransformIndices [ texture ][ side ].push_back ( glm::vec4 { voxelIndex } );
+		//	}
+
+		//	//++voxelIndex;
+		//}
+
+		//for ( auto const & [type, sideIndices] : batchTransformIndices )
+		//{
+		//	for ( auto const & [side, indices] : sideIndices )
+		//	{
+		//		auto & batch { batches [ type ][ side ] };
+		//		glDeleteBuffers ( 1, & ( batch.transformIndexBuffer ) );
+		//		batch.transformIndexBuffer = CreateBufferWithData ( indices, GL_UNIFORM_BUFFER );
+		//		batch.voxelCount = indices.size ();
+		//	}
+		//}
 	}
 
 	void VoxelWorldRenderer::Render ()
@@ -149,17 +251,17 @@ namespace vw
 		glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
 
 		// Bind transform buffer
-		glBindBufferBase ( GL_UNIFORM_BUFFER, 0, transformBuffer );
+		glBindBufferBase ( GL_UNIFORM_BUFFER, 0, voxelBuffer.GetValueBuffer().GetBuffer () );
 
 		auto uniformLoc { glGetUniformLocation ( shaderProgram, "u_highligtedVoxelTransformIndex" ) };
 		
-		if ( world->raycaster.GetTargetVoxel () != nullptr )
+		/*if ( world->raycaster.GetTargetVoxel () != nullptr )
 		{
-			auto transformIndex { voxelTransformIndices.at ( world->raycaster.GetTargetVoxel () ) };
+			auto transformIndex { voxelBuffer.GetValueIndex ( world->raycaster.GetTargetVoxel () ) };
 			glUniform1i ( uniformLoc, static_cast < GLint > ( transformIndex ) );
 		}
 		else
-			glUniform1i ( uniformLoc, -1 );
+			glUniform1i ( uniformLoc, -1 );*/
 
 		for ( auto const & [texture, faceBatches] : batches )
 		{
@@ -169,16 +271,19 @@ namespace vw
 				glBindTexture ( GL_TEXTURE_2D, texture );
 				glUniform1i ( glGetUniformLocation ( shaderProgram, "u_texture" ), 0 );
 
-				glBindBufferBase ( GL_UNIFORM_BUFFER, 1, batch.transformIndexBuffer );
+				glBindBufferBase ( GL_UNIFORM_BUFFER, 1, batch.transformIndexBuffer.GetValueBuffer().GetBuffer () );
 
 				glDrawElementsInstanced (
 					GL_TRIANGLES,
 					6,
 					GL_UNSIGNED_INT,
 					reinterpret_cast < void * > ( GetFaceIndexOffset ( face ) ),
-					batch.voxelCount );
+					batch.transformIndexBuffer.GetElementCount () );
 			}
 		}
+
+
+		
 	}
 
 	void VoxelWorldRenderer::CreateGeometryBuffers ()
@@ -258,4 +363,15 @@ namespace vw
 		default:					return 0;
 		}
 	}
+
+	void VoxelWorldRaycaster::Clear ()
+	{
+		targetVoxel = nullptr;
+	}
+	
+	std::vector <glm::mat4> GetVoxelTransforms ( std::vector <Voxel *> const & voxels )
+	{
+		return {};
+	}
+
 }

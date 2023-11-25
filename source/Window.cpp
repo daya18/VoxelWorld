@@ -1,5 +1,7 @@
 #include "Window.hpp"
 
+#include "Core.hpp"
+
 namespace vw
 {
 	int Window::instanceCount { 0 };
@@ -67,29 +69,26 @@ namespace vw
 
 	void Window::keyCallback ( GLFWwindow * glfwWindow, int key, int scancode, int action, int mods )
 	{
-		GetWindow ( glfwWindow )->lastKey = key;
+		auto & window { *GetWindow ( glfwWindow ) };
 
 		if ( action == GLFW_PRESS )
-			GetWindow ( glfwWindow )->EmitSignal ( "KeyPress" );
+			Invoke ( window.keyDownCallbacks, key );
 		else
-			GetWindow ( glfwWindow )->EmitSignal ( "KeyRelease" );
+			Invoke ( window.keyUpCallbacks, key );
 	}
 
-	void Window::mouseButtonCallback ( GLFWwindow * window, int button, int action, int mods )
+	void Window::mouseButtonCallback ( GLFWwindow * glfwWindow, int button, int action, int mods )
 	{
+		auto & window { *GetWindow ( glfwWindow ) };
 
+		if ( action == GLFW_PRESS )
+			Invoke ( window.buttonDownCallbacks, button );
+		else
+			Invoke ( window.buttonUpCallbacks, button );
 	}
 
 	void Window::mouseEnterCallback ( GLFWwindow * glfwWindow, int entered )
 	{
-	/*	if ( entered )
-		{
-			double x, y;
-			glfwGetCursorPos ( glfwWindow, &x, &y );
-			GetWindow ( glfwWindow )->lastKnownMousePosition = glm::vec2 { x, y };
-			GetWindow ( glfwWindow )->mouseDelta = { 0.0f, 0.0f };
-		}
-	*/
 	}
 
 	bool Window::GetKey ( int key )
@@ -114,21 +113,12 @@ namespace vw
 		lastKnownMousePosition = currentMousePosition;
 	}
 
-	void Window::EnableRawMouseInput ()
+	void Window::SetRawMouseInput ( bool enabled )
 	{
 		if ( glfwRawMouseMotionSupported () )
 		{
-			glfwSetInputMode ( window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
-			glfwSetInputMode ( window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE );
-		}
-	}
-
-	void Window::DisableRawMouseInput ()
-	{
-		if ( glfwRawMouseMotionSupported () )
-		{
-			glfwSetInputMode ( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
-			glfwSetInputMode ( window, GLFW_RAW_MOUSE_MOTION, GLFW_FALSE );
+			glfwSetInputMode ( window, GLFW_CURSOR, enabled ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL );
+			glfwSetInputMode ( window, GLFW_RAW_MOUSE_MOTION, enabled ? GLFW_TRUE : GLFW_FALSE );
 		}
 	}
 

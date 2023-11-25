@@ -7,6 +7,9 @@ namespace vw
 	class Window : public SignalEmitter
 	{
 	public:
+		using KeyCallback = std::function <void ( int )>;
+		using ButtonCallback = std::function <void ( int )>;
+
 		Window ( std::string const & title, glm::uvec2 const & size );
 		Window ( Window const & ) = delete;
 		Window ( Window && ) noexcept;
@@ -20,16 +23,20 @@ namespace vw
 		void MakeGLContextCurrent () const;
 		void SwapBuffers () const;
 		void HandleInput ();
+		
+		void InitImgui () const;
+		void SetRawMouseInput ( bool enabled );
 
-		int GetLastKey () const;
+		// Polling
 		bool GetKey ( int key );
 		bool GetButton ( int button );
-
-		void EnableRawMouseInput ();
-		void DisableRawMouseInput ();
-
 		glm::vec2 const & GetMouseDelta () const;
-		void InitImgui () const;
+
+		// Callbacks
+		void AddKeyDownCallback ( KeyCallback );
+		void AddKeyUpCallback ( KeyCallback );
+		void AddButtonDownCallback ( ButtonCallback );
+		void AddButtonUpCallback ( ButtonCallback );
 
 	private:
 		static Window * GetWindow ( GLFWwindow * );
@@ -44,13 +51,21 @@ namespace vw
 		int lastKey;
 		glm::vec2 lastKnownMousePosition { std::numeric_limits <float>::max (), std::numeric_limits <float>::max () };
 		glm::vec2 mouseDelta { 0.0f, 0.0f };
+		std::vector <KeyCallback> keyDownCallbacks;
+		std::vector <KeyCallback> keyUpCallbacks;
+		std::vector <ButtonCallback> buttonDownCallbacks;
+		std::vector <ButtonCallback> buttonUpCallbacks;
 	};
+
+
 
 	// Implementation
 	inline bool Window::ShouldClose () const { return glfwWindowShouldClose ( window ); }
 	inline void Window::MakeGLContextCurrent () const { glfwMakeContextCurrent ( window ); }
 	inline void Window::SwapBuffers () const { return glfwSwapBuffers ( window ); }
-	inline int Window::GetLastKey () const { return lastKey; }
 	inline glm::vec2 const & Window::GetMouseDelta () const { return mouseDelta; }
-
+	inline void Window::AddKeyDownCallback ( KeyCallback callback )			{ keyDownCallbacks.push_back ( callback ); }
+	inline void Window::AddKeyUpCallback ( KeyCallback callback )			{ keyUpCallbacks.push_back ( callback ); }
+	inline void Window::AddButtonDownCallback ( ButtonCallback callback )	{ buttonDownCallbacks.push_back ( callback ); }
+	inline void Window::AddButtonUpCallback ( ButtonCallback callback )		{ buttonUpCallbacks.push_back ( callback ); }
 }
