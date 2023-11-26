@@ -64,7 +64,8 @@ namespace vw
 
 	void Window::framebufferResizeCallback ( GLFWwindow * glfwWindow, int width, int height )
 	{
-		GetWindow ( glfwWindow )->EmitSignal ( "FramebufferResize" );
+		auto & window { *GetWindow ( glfwWindow ) };
+		Invoke ( window.framebufferResizeCallbacks, glm::vec2 { width, height } );
 	}
 
 	void Window::keyCallback ( GLFWwindow * glfwWindow, int key, int scancode, int action, int mods )

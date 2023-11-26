@@ -19,10 +19,6 @@ namespace vw
 	{
 		CreateGeometryBuffers ();
 		CreateVertexArray ();
-
-		//glBindVertexArray ( vertexArray );
-		//glBindVertexBuffer ( 0, vertexBuffer, 0, sizeof ( GLfloat ) * ( 3 + 2 + 3 ) );
-
 		CreateShaderProgram ();
 
 		auto transformsBI { glGetUniformBlockIndex ( shaderProgram, "u_Transforms" ) };
@@ -188,15 +184,9 @@ namespace vw
 
 	void SimpleVoxelWorldRenderer::CreateShaderProgram ()
 	{
-		shaderProgram = vw::CreateShaderProgram (
-			"shader/SimpleVoxelShader.glsl.vert",
-			"shader/SimpleVoxelShader.glsl.frag" );
-
-		simpleShaderProgram = vw::CreateShaderProgram (
-			"shader/SimpleShader.glsl.vert",
-			"shader/SimpleShader.glsl.frag" );
+		shaderProgram = vw::CreateShaderProgram ( "shader/SimpleVoxelShader.glsl.vert", "shader/SimpleVoxelShader.glsl.frag" );
+		simpleShaderProgram = vw::CreateShaderProgram ( "shader/SimpleShader.glsl.vert", "shader/SimpleShader.glsl.frag" );
 	}
-
 
 	void SimpleVoxelWorldRenderer::CreateVertexArray ()
 	{

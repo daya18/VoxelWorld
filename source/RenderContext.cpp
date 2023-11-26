@@ -34,6 +34,8 @@ namespace vw
 	void RenderContext::Begin ()
 	{
 		window->MakeGLContextCurrent ();
+		auto windowSize { window->GetSize () };
+		glViewport ( 0, 0, windowSize.x, windowSize.y );
 		glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 		ImGui_ImplGlfw_NewFrame ();

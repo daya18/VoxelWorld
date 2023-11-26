@@ -4,8 +4,8 @@
 
 namespace vw
 {
-	float Camera::moveSensitivity { 0.02f };
-	float Camera::rotateSensitivity { 0.08f };
+	float Camera::moveSensitivity { 1.5f };
+	float Camera::rotateSensitivity { 9.0f };
 
 	Camera::Camera ( Window & window )
 	:
@@ -16,33 +16,38 @@ namespace vw
 		UpdateViewMatrix ();
 		UpdateProjectionMatrix ();
 
-		//window.AddSignalListener ( "MouseMove", [] () {std::cout << "BOBOPP" << std::endl; } );
+		window.AddFramebufferResizeCallback ( [this] ( glm::vec2 const & size )
+			{
+				UpdateViewMatrix ();
+				UpdateProjectionMatrix ();
+			}
+		);
 	}
 
 	void Camera::Update ( float deltaTime )
 	{
 		// Handle Move
 		if ( window->GetKey ( GLFW_KEY_D ) == GLFW_PRESS )
-			Move ( GetRight () * moveSensitivity );
+			Move ( GetRight () * moveSensitivity * deltaTime );
 			
 		if ( window->GetKey ( GLFW_KEY_A ) == GLFW_PRESS )
-			Move ( -GetRight () * moveSensitivity );
+			Move ( -GetRight () * moveSensitivity * deltaTime );
 		
 		if ( window->GetKey ( GLFW_KEY_W ) == GLFW_PRESS )
-			Move ( glm::cross ( glm::vec3 { 0, 1, 0 }, GetRight () ) * moveSensitivity );
+			Move ( glm::cross ( glm::vec3 { 0, 1, 0 }, GetRight () ) * moveSensitivity * deltaTime );
 
 		if ( window->GetKey ( GLFW_KEY_S ) == GLFW_PRESS )
-			Move ( -glm::cross ( glm::vec3 { 0, 1, 0 }, GetRight () ) * moveSensitivity );
+			Move ( -glm::cross ( glm::vec3 { 0, 1, 0 }, GetRight () ) * moveSensitivity * deltaTime );
 		
 		if ( window->GetKey ( GLFW_KEY_SPACE ) == GLFW_PRESS )
-			Move ( glm::vec3 { 0.0f, 1.0f, 0.0f } * moveSensitivity );
+			Move ( glm::vec3 { 0.0f, 1.0f, 0.0f } * moveSensitivity * deltaTime );
 
 		if ( window->GetKey ( GLFW_KEY_LEFT_SHIFT ) == GLFW_PRESS )
-			Move ( glm::vec3 { 0.0f, -1.0f, 0.0f } * moveSensitivity );
+			Move ( glm::vec3 { 0.0f, -1.0f, 0.0f } * moveSensitivity * deltaTime );
 
 		// Handle rotation
-		Rotate ( { 0.0f, 1.0f, 0.0f }, -window->GetMouseDelta ().x * rotateSensitivity );
-		Rotate ( GetRight (), -window->GetMouseDelta ().y * rotateSensitivity);
+		Rotate ( { 0.0f, 1.0f, 0.0f }, -window->GetMouseDelta ().x * rotateSensitivity * deltaTime );
+		Rotate ( GetRight (), -window->GetMouseDelta ().y * rotateSensitivity * deltaTime );
 		
 		UpdateViewMatrix ();
 	}

@@ -9,6 +9,7 @@ namespace vw
 	public:
 		using KeyCallback = std::function <void ( int )>;
 		using ButtonCallback = std::function <void ( int )>;
+		using FramebufferResizeCallback = std::function <void ( glm::vec2 const & )>;
 
 		Window ( std::string const & title, glm::uvec2 const & size );
 		Window ( Window const & ) = delete;
@@ -37,6 +38,7 @@ namespace vw
 		void AddKeyUpCallback ( KeyCallback );
 		void AddButtonDownCallback ( ButtonCallback );
 		void AddButtonUpCallback ( ButtonCallback );
+		void AddFramebufferResizeCallback ( FramebufferResizeCallback );
 
 	private:
 		static Window * GetWindow ( GLFWwindow * );
@@ -55,6 +57,7 @@ namespace vw
 		std::vector <KeyCallback> keyUpCallbacks;
 		std::vector <ButtonCallback> buttonDownCallbacks;
 		std::vector <ButtonCallback> buttonUpCallbacks;
+		std::vector <FramebufferResizeCallback> framebufferResizeCallbacks;
 	};
 
 
@@ -64,8 +67,9 @@ namespace vw
 	inline void Window::MakeGLContextCurrent () const { glfwMakeContextCurrent ( window ); }
 	inline void Window::SwapBuffers () const { return glfwSwapBuffers ( window ); }
 	inline glm::vec2 const & Window::GetMouseDelta () const { return mouseDelta; }
-	inline void Window::AddKeyDownCallback ( KeyCallback callback )			{ keyDownCallbacks.push_back ( callback ); }
-	inline void Window::AddKeyUpCallback ( KeyCallback callback )			{ keyUpCallbacks.push_back ( callback ); }
-	inline void Window::AddButtonDownCallback ( ButtonCallback callback )	{ buttonDownCallbacks.push_back ( callback ); }
-	inline void Window::AddButtonUpCallback ( ButtonCallback callback )		{ buttonUpCallbacks.push_back ( callback ); }
+	inline void Window::AddKeyDownCallback ( KeyCallback callback )							{ keyDownCallbacks.push_back ( callback ); }
+	inline void Window::AddKeyUpCallback ( KeyCallback callback )							{ keyUpCallbacks.push_back ( callback ); }
+	inline void Window::AddButtonDownCallback ( ButtonCallback callback )					{ buttonDownCallbacks.push_back ( callback ); }
+	inline void Window::AddButtonUpCallback ( ButtonCallback callback )						{ buttonUpCallbacks.push_back ( callback ); }
+	inline void Window::AddFramebufferResizeCallback ( FramebufferResizeCallback callback ) { framebufferResizeCallbacks.push_back ( callback ); }
 }
