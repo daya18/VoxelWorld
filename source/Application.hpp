@@ -21,7 +21,7 @@ namespace vw
 
 		void Run ();
 		Window & GetWindow ();
-		VoxelModel const & GetVoxelModel () const;
+		//VoxelModel const & GetVoxelModel () const;
 
 	private:
 		void SetPaused ( bool paused );
@@ -30,7 +30,7 @@ namespace vw
 
 		bool quit { false };
 		bool paused;
-		VoxelModel voxelModel;
+		//VoxelModel voxelModel;
 		Window window;
 		RenderContext renderContext;
 		std::unordered_map <std::string, GLuint> voxelTypeTextures;
@@ -44,5 +44,5 @@ namespace vw
 
 	// Implementation
 	inline Window & Application::GetWindow () { return window; }
-	inline VoxelModel const & Application::GetVoxelModel () const { return voxelModel; }
+	//inline VoxelModel const & Application::GetVoxelModel () const { return voxelModel; }
 }

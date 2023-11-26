@@ -44,7 +44,7 @@ target_sources ( VoxelWorld PRIVATE
 	"source/Main.cpp"		
 	"source/Window.cpp"
 	"source/Application.cpp" 
-	"source/VoxelWorldRenderer.cpp"
+	
 	"source/RenderContext.cpp" 
 	"source/VoxelWorld.cpp" 
 	"source/SignalEmitter.cpp"
@@ -54,7 +54,13 @@ target_sources ( VoxelWorld PRIVATE
 	"source/World.cpp"  
 	 
 	
- "source/VoxelWorldRaycaster.cpp"    "source/impex.cpp" "source/VoxelModel.cpp" "source/Core.cpp"  "source/Player.cpp" "source/buffer/MapBuffer.cpp"  "source/buffer/VectorBuffer.cpp" "source/SimpleVoxelWorldRenderer.cpp")
+ "source/VoxelWorldRaycaster.cpp"    
+ "source/impex.cpp" 
+ "source/VoxelModel.cpp" 
+ "source/Core.cpp" 
+ "source/Player.cpp"   
+ "source/opengl/VectorBuffer.cpp" 
+ "source/SimpleVoxelWorldRenderer.cpp" "source/Mesh.cpp" "source/opengl/Buffer.cpp" "source/opengl/VertexArray.cpp" "source/opengl/Type.cpp")
 
 target_include_directories ( VoxelWorld PRIVATE 
 	external/glad/include

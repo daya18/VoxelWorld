@@ -21,6 +21,8 @@ namespace vw
 		glfwSetKeyCallback ( window, keyCallback );
 
 		++instanceCount;
+
+		glfwSwapInterval ( 1 );
 	}
 
 	Window::Window ( Window && r ) noexcept

@@ -63,4 +63,9 @@ namespace vw
 		voxels.shrink_to_fit ();
 		return voxels;
 	}
+
+	void VoxelWorldRaycaster::Clear ()
+	{
+		targetVoxel = nullptr;
+	}
 }

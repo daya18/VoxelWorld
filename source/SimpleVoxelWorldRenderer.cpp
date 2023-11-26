@@ -12,13 +12,13 @@
 namespace vw
 {
 	SimpleVoxelWorldRenderer::SimpleVoxelWorldRenderer ( Application & application, VoxelWorld & world )
-		:
+	:
 		destroyResources ( true ),
+		voxelMesh ( "model/Voxel.obj", glm::scale (glm::identity <glm::mat4> (), { 0.5f, 0.5f, 0.5f }) ),
+		voxelOutlineMesh ( "model/Voxel.obj", glm::scale ( glm::identity <glm::mat4> (), { 0.5f, 0.5f, 0.5f } ), "Outline" ),
 		application ( & application ),
 		world ( & world )
 	{
-		CreateGeometryBuffers ();
-		CreateVertexArray ();
 		CreateShaderProgram ();
 
 		auto transformsBI { glGetUniformBlockIndex ( shaderProgram, "u_Transforms" ) };
@@ -39,10 +39,7 @@ namespace vw
 	{
 		if ( destroyResources )
 		{
-			glDeleteBuffers ( 1, &vertexBuffer );
-			glDeleteBuffers ( 1, &indexBuffer );
 			glDeleteProgram ( shaderProgram );
-			glDeleteVertexArrays ( 1, &vertexArray );
 		}
 	}
 
@@ -66,10 +63,6 @@ namespace vw
 	SimpleVoxelWorldRenderer & SimpleVoxelWorldRenderer::operator = ( SimpleVoxelWorldRenderer && r )
 	{
 		destroyResources = std::exchange ( r.destroyResources, false );
-
-		vertexBuffer = r.vertexBuffer;
-		vertexArray = r.vertexArray;
-		indexBuffer = r.indexBuffer;
 		shaderProgram = r.shaderProgram;
 
 		std::cout << "Warning: Move semantics not fully implemented" << std::endl;
@@ -99,10 +92,7 @@ namespace vw
 	{
 		glUseProgram ( simpleShaderProgram );
 
-		// Bind vertex and index buffers
-		glBindVertexArray ( vertexArray );
-		glBindVertexBuffer ( 0, outlineVertexBuffer, 0, sizeof ( GLfloat ) * ( 3 + 2 + 3 ) );
-		glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, outlineIndexBuffer );
+		voxelOutlineMesh.Bind ();
 
 		// Set color to black
 		glUniform4f ( glGetUniformLocation ( simpleShaderProgram, "u_color" ), 0.0f, 0.0f, 0.0f, 1.0f );
@@ -111,7 +101,7 @@ namespace vw
 		glUniformMatrix4fv ( glGetUniformLocation ( simpleShaderProgram, "u_modelMatrix" ),
 			1, GL_FALSE, glm::value_ptr ( transform ) );
 
-		glDrawElements ( GL_TRIANGLES, outlineIndexCount, GL_UNSIGNED_INT, nullptr );
+		glDrawElements ( GL_TRIANGLES, voxelOutlineMesh.GetIndexCount (), GL_UNSIGNED_INT, nullptr);
 	}
 
 	void SimpleVoxelWorldRenderer::Update ()
@@ -128,22 +118,19 @@ namespace vw
 			voxelDatas.push_back ( { voxel.GetTransformMatrix () } );
 		}
 
-		glDeleteBuffers ( 1, &voxelBuffer );
-		voxelBuffer = CreateBufferWithData <VoxelData> ( voxelDatas, GL_UNIFORM_BUFFER );
+		voxelBuffer.Clear ();
+		voxelBuffer .PushBack ( voxelDatas );
 		voxelCount = voxelDatas.size ();
 	}
 
 	void SimpleVoxelWorldRenderer::Render ()
 	{
 		glUseProgram ( shaderProgram );
-
-		// Bind vertex and index buffers
-		glBindVertexArray ( vertexArray );
-		glBindVertexBuffer ( 0, vertexBuffer, 0, sizeof ( GLfloat ) * ( 3 + 2 + 3 ) );
-		glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
+		
+		voxelMesh.Bind ();
 
 		// Bind transform buffer
-		glBindBufferBase ( GL_UNIFORM_BUFFER, 0, voxelBuffer );
+		glBindBufferBase ( GL_UNIFORM_BUFFER, 0, voxelBuffer.GetBuffer () );
 
 		auto texture { application->voxelTypeTextures.at ( "Grass" ) };
 
@@ -156,7 +143,7 @@ namespace vw
 			6 * 6,
 			GL_UNSIGNED_INT,
 			0,
-			voxelCount 
+			voxelBuffer.GetElementCount ()
 		);
 
 		// Render outline
@@ -167,57 +154,9 @@ namespace vw
 		}
 	}
 
-	void SimpleVoxelWorldRenderer::CreateGeometryBuffers ()
-	{
-		auto voxelModel { application->voxelModel };
-		voxelModel.Transform ( glm::scale ( glm::identity <glm::mat4> (), { 0.5f, 0.5f, 0.5f } ) );
-
-		auto voxelMesh { voxelModel.GetScene () };
-		vertexBuffer = CreateBufferWithData ( impex::InterleaveVertices ( voxelMesh.vertices ), GL_ARRAY_BUFFER );
-		indexBuffer = CreateBufferWithData ( voxelMesh.indices, GL_ELEMENT_ARRAY_BUFFER );
-
-		auto outlineMesh { voxelModel.GetScene ().meshes.at ( "Outline" ) };
-		outlineVertexBuffer = CreateBufferWithData ( impex::InterleaveVertices ( outlineMesh.vertices ), GL_ARRAY_BUFFER );
-		outlineIndexBuffer = CreateBufferWithData ( outlineMesh.indices, GL_ELEMENT_ARRAY_BUFFER );
-		outlineIndexCount = outlineMesh.indices.size ();
-	}
-
 	void SimpleVoxelWorldRenderer::CreateShaderProgram ()
 	{
 		shaderProgram = vw::CreateShaderProgram ( "shader/SimpleVoxelShader.glsl.vert", "shader/SimpleVoxelShader.glsl.frag" );
 		simpleShaderProgram = vw::CreateShaderProgram ( "shader/SimpleShader.glsl.vert", "shader/SimpleShader.glsl.frag" );
-	}
-
-	void SimpleVoxelWorldRenderer::CreateVertexArray ()
-	{
-		glGenVertexArrays ( 1, &vertexArray );
-		glBindVertexArray ( vertexArray );
-
-		glEnableVertexAttribArray ( 0 );
-		glVertexAttribFormat ( 0, 3, GL_FLOAT, GL_FALSE, 0 );
-		glVertexAttribBinding ( 0, 0 );
-
-		glEnableVertexAttribArray ( 1 );
-		glVertexAttribFormat ( 1, 2, GL_FLOAT, GL_FALSE, sizeof ( GLfloat ) * 3 );
-		glVertexAttribBinding ( 1, 0 );
-
-		glEnableVertexAttribArray ( 2 );
-		glVertexAttribFormat ( 2, 3, GL_FLOAT, GL_FALSE, sizeof ( GLfloat ) * ( 3 + 2 ) );
-		glVertexAttribBinding ( 2, 0 );
-	}
-
-	GLuint SimpleVoxelWorldRenderer::GetFaceIndexOffset ( Sides face )
-	{
-		// TO DO: Hard coded values, bad...
-		switch ( face )
-		{
-		case Sides::back:	return ( 6 * 0 ) * sizeof ( GLuint );
-		case Sides::left:	return ( 6 * 1 ) * sizeof ( GLuint );
-		case Sides::forward:	return ( 6 * 2 ) * sizeof ( GLuint );
-		case Sides::up:		return ( 6 * 3 ) * sizeof ( GLuint );
-		case Sides::down:	return ( 6 * 4 ) * sizeof ( GLuint );
-		case Sides::right:	return ( 6 * 5 ) * sizeof ( GLuint );
-		default:					return 0;
-		}
 	}
 }

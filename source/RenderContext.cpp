@@ -18,6 +18,10 @@ namespace vw
 		glEnable ( GL_DEBUG_OUTPUT );
 		glEnable ( GL_DEPTH_TEST );
 
+		glEnable ( GL_CULL_FACE );
+		glCullFace ( GL_BACK );
+		glFrontFace ( GL_CCW );
+
 		imguiContext = ImGui::CreateContext ();
 
 		window.InitImgui ();

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Voxel.hpp"
-#include "buffer/MapBuffer.hpp"
+#include "opengl/VectorBuffer.hpp"
+#include "Mesh.hpp"
 
 namespace vw
 {
@@ -40,28 +41,21 @@ namespace vw
 		
 		std::vector <glm::mat4> GetVoxelTransforms ( std::vector <Voxel *> const & );
 
-		GLuint GetFaceIndexOffset ( Sides );
 		void SetView ( glm::mat4 const & );
 		void SetProjection ( glm::mat4 const & );
 
 		// Initialization helpers
-		void CreateGeometryBuffers ();
 		void CreateShaderProgram ();
-		void CreateVertexArray ();
 
 		Application const * application;
 		VoxelWorld * world;
 
 		bool destroyResources;
-		GLuint vertexBuffer;
-		GLuint indexBuffer;
+		Mesh voxelMesh;
+		Mesh voxelOutlineMesh;
+		
 		GLuint shaderProgram;
 		GLuint simpleShaderProgram;
-		GLuint vertexArray;
-		
-		GLuint outlineVertexBuffer;
-		GLuint outlineIndexBuffer;
-		GLuint outlineIndexCount;
 
 		VoxelWorld * voxelWorld;
 		
@@ -71,9 +65,7 @@ namespace vw
 		GLuint projectionMatrixUniformLocation;
 		GLuint colorUniformLocation;
 		
-		GLuint voxelBuffer { 0 };
+		VectorBuffer <VoxelData> voxelBuffer;
 		GLuint voxelCount { 0 };
-		//std::unordered_map <std::string, 
-		
 	};
 }

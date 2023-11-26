@@ -16,6 +16,7 @@ namespace vw
 
 		void PushBack ( std::vector <Type> const & newElements );
 		void Erase ( std::vector <unsigned int> const & indices );
+		void Update ( std::vector <std::pair <unsigned int, Type>> const & );
 		void Clear ();
 
 		GLuint GetBuffer () const;
@@ -68,6 +69,7 @@ namespace vw
 	void VectorBuffer<Type>::Clear ()
 	{
 		glDeleteBuffers ( 1, &buffer );
+		buffer = 0;
 		elementCount = 0;
 	}
 
@@ -128,6 +130,11 @@ namespace vw
 			buffer = newBuffer;
 			--elementCount;
 		}
+	}
+	
+	template < class Type >
+	void VectorBuffer<Type>::Update ( std::vector <std::pair <unsigned int, Type>> const & )
+	{
 	}
 
 	template < class Type >

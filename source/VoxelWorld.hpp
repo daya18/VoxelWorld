@@ -47,7 +47,6 @@ namespace vw
 		VoxelWorldRaycaster raycaster;
 
 		friend class Voxel;
-		friend class VoxelWorldRenderer;
 		friend class SimpleVoxelWorldRenderer;
 		friend class VoxelWorldRaycaster;
 	};

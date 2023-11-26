@@ -10,8 +10,8 @@ namespace vw
 		voxelWorld ( application ),
 		player ( *this )
 	{
-		voxelWorld.Fill ( { -20, -20, -20 }, { 20, 0, 20 }, "Grass" );
-		//voxelWorld.Fill ( { -5, -5, -5 }, { 5, 0, 5 }, "Grass" );
+		//voxelWorld.Fill ( { -20, -20, -20 }, { 20, 0, 20 }, "Grass" );
+		voxelWorld.Fill ( { -5, -5, -5 }, { 5, 0, 5 }, "Grass" );
 
 		//voxelWorld.AddVoxel ( { 0, 0, 0 }, "Grass" );
 		/*voxelWorld.AddVoxel ( { 1, 0, 0 }, "Log" );
