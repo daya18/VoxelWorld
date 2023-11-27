@@ -31,7 +31,7 @@ namespace vw
 	Application::~Application ()
 	{
 		auto textures { GetValues <GLuint> ( voxelTypeTextures ) };
-		glDeleteTextures ( textures.size (), textures.data () );
+		glDeleteTextures ( static_cast <GLsizei> ( textures.size () ), textures.data () );
 	}
 
 	void Application::Run ()

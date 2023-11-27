@@ -2,6 +2,7 @@
 
 #include "Voxel.hpp"
 #include "opengl/VectorBuffer.hpp"
+#include "opengl/Shader.hpp"
 #include "Mesh.hpp"
 
 namespace vw
@@ -13,12 +14,6 @@ namespace vw
 	{
 	public:
 		SimpleVoxelWorldRenderer ( Application &, VoxelWorld & );
-		SimpleVoxelWorldRenderer ( SimpleVoxelWorldRenderer const & ) = delete;
-		SimpleVoxelWorldRenderer ( SimpleVoxelWorldRenderer && );
-		~SimpleVoxelWorldRenderer ();
-
-		SimpleVoxelWorldRenderer & operator = ( SimpleVoxelWorldRenderer const & ) = delete;
-		SimpleVoxelWorldRenderer & operator = ( SimpleVoxelWorldRenderer && );
 
 		void SetCamera ( Camera & );
 
@@ -47,23 +42,15 @@ namespace vw
 		// Initialization helpers
 		void CreateShaderProgram ();
 
+		bool destroyResources;
 		Application const * application;
 		VoxelWorld * world;
 
-		bool destroyResources;
 		Mesh voxelMesh;
 		Mesh voxelOutlineMesh;
 		
-		GLuint shaderProgram;
-		GLuint simpleShaderProgram;
-
-		VoxelWorld * voxelWorld;
-		
-		// Uniform locations
-		GLuint modelMatricesUniformLocation;
-		GLuint viewMatrixUniformLocation;
-		GLuint projectionMatrixUniformLocation;
-		GLuint colorUniformLocation;
+		Shader shaderProgram;
+		Shader simpleShaderProgram;
 		
 		VectorBuffer <VoxelData> voxelBuffer;
 		GLuint voxelCount { 0 };

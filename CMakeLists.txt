@@ -60,7 +60,7 @@ target_sources ( VoxelWorld PRIVATE
  "source/Core.cpp" 
  "source/Player.cpp"   
  "source/opengl/VectorBuffer.cpp" 
- "source/SimpleVoxelWorldRenderer.cpp" "source/Mesh.cpp" "source/opengl/Buffer.cpp" "source/opengl/VertexArray.cpp" "source/opengl/Type.cpp")
+ "source/SimpleVoxelWorldRenderer.cpp" "source/Mesh.cpp" "source/opengl/Buffer.cpp" "source/opengl/VertexArray.cpp" "source/opengl/Type.cpp" "source/opengl/Shader.cpp")
 
 target_include_directories ( VoxelWorld PRIVATE 
 	external/glad/include

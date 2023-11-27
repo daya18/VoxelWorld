@@ -38,11 +38,11 @@ namespace vw
 
 		std::vector <Voxel *> newVoxels;
 		
-		for ( int x = min.x; x <= max.x; ++x )
+		for ( float x = min.x; x <= max.x; ++x )
 		{
-			for ( int y = min.y; y <= max.y; ++y )
+			for ( float y = min.y; y <= max.y; ++y )
 			{
-				for ( int z = min.z; z <= max.z; ++z )
+				for ( float z = min.z; z <= max.z; ++z )
 				{
 					glm::vec3 position { x, y, z };
 					newVoxels.push_back ( &voxels.insert ( { position, { *this, { position, voxelType } } } ).first->second );

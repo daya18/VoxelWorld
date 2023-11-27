@@ -96,7 +96,7 @@ namespace vw
 
 		glDeleteBuffers ( 1, &buffer );
 		buffer = newBuffer;
-		elementCount += newElements.size ();
+		elementCount += static_cast <unsigned int> ( newElements.size () );
 	}
 
 	template < class Type >

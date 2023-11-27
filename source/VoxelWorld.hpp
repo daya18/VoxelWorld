@@ -55,6 +55,6 @@ namespace vw
 	inline float VoxelWorld::GetVoxelScale () const { return voxelScale; }
 	inline Application const & VoxelWorld::GetApplication () const { return *application; }
 	inline VoxelWorldRaycaster & VoxelWorld::GetRaycaster () { return raycaster; }
-	inline unsigned int VoxelWorld::GetVoxelCount () const { return voxels.size (); }
+	inline unsigned int VoxelWorld::GetVoxelCount () const { return static_cast < unsigned int > ( voxels.size () ); }
 
 }
