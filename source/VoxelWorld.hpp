@@ -3,7 +3,9 @@
 #include "Voxel.hpp"
 #include "Camera.hpp"
 #include "VoxelWorldRaycaster.hpp"
-#include "SimpleVoxelWorldRenderer.hpp"
+#include "opengl/VectorBuffer.hpp"
+#include "opengl/Shader.hpp"
+#include "Mesh.hpp"
 
 namespace vw
 {
@@ -33,8 +35,15 @@ namespace vw
 		unsigned int GetVoxelCount () const;
 
 	private:
+		struct VoxelData
+		{
+			glm::mat4 transform;
+		};
+
 		void UpdateAllVoxelNeighbours ();
 		void UpdateVoxelNeighbours ( Voxel & );
+		void UpdateRenderList ();
+		void RenderVoxelOutline ( glm::mat4 const & transform );
 
 		float voxelScale = 1.0f;
 
@@ -43,11 +52,15 @@ namespace vw
 		Camera camera;
 		std::unordered_map <glm::vec3, Voxel> voxels;
 
-		SimpleVoxelWorldRenderer simpleRenderer;
 		VoxelWorldRaycaster raycaster;
 
+		Mesh voxelMesh;
+		Mesh voxelOutlineMesh;
+		Shader shaderProgram;
+		Shader simpleShaderProgram;
+		VectorBuffer <VoxelData> voxelBuffer;
+
 		friend class Voxel;
-		friend class SimpleVoxelWorldRenderer;
 		friend class VoxelWorldRaycaster;
 	};
 	

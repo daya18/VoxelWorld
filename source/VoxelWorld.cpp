@@ -12,9 +12,11 @@ namespace vw
 		window ( & application.window ),
 		camera ( *window ),
 		raycaster ( application, *this ),
-		simpleRenderer ( application, *this )
+		voxelMesh ( "model/Voxel.obj", glm::scale ( glm::identity <glm::mat4> (), { 0.5f, 0.5f, 0.5f } ) ),
+		voxelOutlineMesh ( "model/Voxel.obj", glm::scale ( glm::identity <glm::mat4> (), { 0.5f, 0.5f, 0.5f } ), "Outline" ),
+		shaderProgram ( "shader/SimpleVoxelShader" ),
+		simpleShaderProgram ( "shader/SimpleShader" )
 	{
-		simpleRenderer.SetCamera ( camera );
 	}
 
 	void VoxelWorld::AddVoxel ( glm::vec3 const & position, std::string const & type )
@@ -26,7 +28,7 @@ namespace vw
 		for ( auto neighbour : voxel.GetNeighbours () )
 			UpdateVoxelNeighbours ( *neighbour );
 
-		simpleRenderer.AddVoxels ( { &voxel } );
+		UpdateRenderList ();
 	}	
 	
 	void VoxelWorld::Fill ( glm::vec3 const & fromPosition, glm::vec3 const & toPosition, std::string const & voxelType )
@@ -52,7 +54,7 @@ namespace vw
 
 		UpdateAllVoxelNeighbours ();
 
-		simpleRenderer.AddVoxels ( newVoxels );
+		UpdateRenderList ();
 	}
 
 	void VoxelWorld::RemoveVoxels ( std::vector <Voxel *> const & voxels )
@@ -74,7 +76,7 @@ namespace vw
 		for ( auto & voxel : neighbours )
 				UpdateVoxelNeighbours ( *voxel );
 		
-		simpleRenderer.RemoveVoxels ( voxels );
+		UpdateRenderList ();
 	}
 
 	void VoxelWorld::Update ( float deltaTime )
@@ -85,7 +87,33 @@ namespace vw
 
 	void VoxelWorld::Render ()
 	{
-		simpleRenderer.Render ();
+		shaderProgram.Use ();
+		camera.Bind ( shaderProgram );
+		voxelMesh.Bind ();
+
+		// Bind transform buffer
+		glBindBufferBase ( GL_UNIFORM_BUFFER, 0, voxelBuffer.GetBuffer () );
+
+		auto texture { application->voxelTypeTextures.at ( "Grass" ) };
+
+		glActiveTexture ( GL_TEXTURE0 );
+		glBindTexture ( GL_TEXTURE_2D, texture );
+		shaderProgram.SetUniform ( "u_texture", 0 );
+
+		glDrawElementsInstanced (
+			GL_TRIANGLES,
+			6 * 6,
+			GL_UNSIGNED_INT,
+			0,
+			voxelBuffer.GetElementCount ()
+		);
+
+		// Render outline
+		{
+			auto targetVoxel { raycaster.GetTargetVoxel () };
+			if ( targetVoxel != nullptr )
+				RenderVoxelOutline ( targetVoxel->GetTransformMatrix () );
+		}
 	}
 	
 	void VoxelWorld::UpdateAllVoxelNeighbours ()
@@ -104,6 +132,41 @@ namespace vw
 			FindVoxel ( voxel.GetPosition () + GetDirectionVector ( Sides::forward ) ),
 			FindVoxel ( voxel.GetPosition () + GetDirectionVector ( Sides::back ) ),
 		};
+	}
+
+	void VoxelWorld::UpdateRenderList ()
+	{
+		std::vector <VoxelData> voxelDatas;
+
+		voxelDatas.reserve ( voxels.size () );
+
+		for ( auto const & [position, voxel] : voxels )
+		{
+			if ( voxel.GetNeighbours ().size () == 6 )
+				continue;
+
+			voxelDatas.push_back ( { voxel.GetTransformMatrix () } );
+		}
+
+		voxelBuffer.Clear ();
+		voxelBuffer.PushBack ( voxelDatas );
+	}
+
+	void VoxelWorld::RenderVoxelOutline ( glm::mat4 const & transform )
+	{
+		simpleShaderProgram.Use ();
+
+		camera.Bind ( simpleShaderProgram );
+
+		voxelOutlineMesh.Bind ();
+
+		// Set color to black
+		simpleShaderProgram.SetUniform ( "u_color", { 0.0f, 0.0f, 0.0f, 1.0f } );
+
+		// Set model matrix
+		simpleShaderProgram.SetUniform ( "u_modelMatrix", transform );
+
+		glDrawElements ( GL_TRIANGLES, voxelOutlineMesh.GetIndexCount (), GL_UNSIGNED_INT, nullptr );
 	}
 
 	Voxel * VoxelWorld::FindVoxel ( glm::vec3 const & position )

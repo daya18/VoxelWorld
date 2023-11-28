@@ -1,6 +1,7 @@
 #include "Camera.hpp"
 
 #include "Window.hpp"
+#include "opengl/Shader.hpp"
 
 namespace vw
 {
@@ -50,6 +51,12 @@ namespace vw
 		Rotate ( GetRight (), -window->GetMouseDelta ().y * rotateSensitivity * deltaTime );
 		
 		UpdateViewMatrix ();
+	}
+
+	void Camera::Bind ( Shader & shader )
+	{
+		shader.SetUniform ( "u_viewMatrix", viewMatrix );
+		shader.SetUniform ( "u_projectionMatrix", projectionMatrix );
 	}
 
 	void Camera::Rotate ( glm::vec3 normal, float angle )

@@ -5,6 +5,7 @@
 namespace vw
 {
 	class Window;
+	class Shader;
 
 	class Camera : public SignalEmitter
 	{
@@ -18,6 +19,7 @@ namespace vw
 		glm::vec3 GetTargetDirection () const;
 
 		void Update ( float deltaTime );
+		void Bind ( Shader & );
 
 	private:
 		static float moveSensitivity;
