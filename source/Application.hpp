@@ -3,7 +3,6 @@
 #include "Window.hpp"
 #include "RenderContext.hpp"
 #include "World.hpp"
-#include "VoxelModel.hpp"
 
 namespace vw
 {
@@ -21,7 +20,6 @@ namespace vw
 
 		void Run ();
 		Window & GetWindow ();
-		//VoxelModel const & GetVoxelModel () const;
 
 	private:
 		void SetPaused ( bool paused );
@@ -30,7 +28,6 @@ namespace vw
 
 		bool quit { false };
 		bool paused;
-		//VoxelModel voxelModel;
 		Window window;
 		RenderContext renderContext;
 		std::unordered_map <std::string, GLuint> voxelTypeTextures;
@@ -38,11 +35,8 @@ namespace vw
 		std::chrono::steady_clock::time_point lastFrameTime;
 
 		friend class VoxelWorld;
-		friend class VoxelWorldRenderer;
-		friend class SimpleVoxelWorldRenderer;
 	};
 
 	// Implementation
 	inline Window & Application::GetWindow () { return window; }
-	//inline VoxelModel const & Application::GetVoxelModel () const { return voxelModel; }
 }

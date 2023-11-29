@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Core.hpp"
-#include "VoxelModel.hpp"
 #include <ei/3dtypes.hpp>
 
 namespace vw
