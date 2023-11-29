@@ -28,7 +28,7 @@ namespace vw
 					nextBlockPlaceBreakCountdown = blockPlaceBreakDelay;
 
 					if ( raycaster.GetTargetVoxel () != nullptr )
-						voxelWorld.RemoveVoxels ( { raycaster.GetTargetVoxel () } );
+						voxelWorld.RemoveVoxel ( raycaster.GetTargetVoxel () );
 				}
 				else
 					nextBlockPlaceBreakCountdown -= deltaTime;
@@ -54,5 +54,10 @@ namespace vw
 
 		if ( ! window.GetButton ( GLFW_MOUSE_BUTTON_LEFT ) && !window.GetButton ( GLFW_MOUSE_BUTTON_RIGHT ) )
 			nextBlockPlaceBreakCountdown = 0.0f;
+	}
+
+	void Player::Render ()
+	{
+
 	}
 }

@@ -10,6 +10,7 @@ namespace vw
 		Player ( World & );
 
 		void Update ( float deltaTime );
+		void Render ();
 
 	private:
 		static float const blockPlaceBreakDelay;

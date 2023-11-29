@@ -28,7 +28,12 @@ namespace vw
 		for ( auto neighbour : voxel.GetNeighbours () )
 			UpdateVoxelNeighbours ( *neighbour );
 
-		UpdateRenderList ();
+		typeVoxelBuffers[type].Insert ({ { &voxel, { voxel.GetTransformMatrix () } } });
+
+		for ( auto neighbour : voxel.GetNeighbours () )
+			if ( neighbour->GetNeighbours ().size () == 6 )
+				typeVoxelBuffers[neighbour->GetType()].Erase ( { neighbour } );
+
 	}	
 	
 	void VoxelWorld::Fill ( glm::vec3 const & fromPosition, glm::vec3 const & toPosition, std::string const & voxelType )
@@ -38,7 +43,7 @@ namespace vw
 
 		// TO DO: Optimize using std::vector::reserve
 
-		std::vector <Voxel *> newVoxels;
+		std::vector <Voxel *> visibleVoxels;
 		
 		for ( float x = min.x; x <= max.x; ++x )
 		{
@@ -47,36 +52,45 @@ namespace vw
 				for ( float z = min.z; z <= max.z; ++z )
 				{
 					glm::vec3 position { x, y, z };
-					newVoxels.push_back ( &voxels.insert ( { position, { *this, { position, voxelType } } } ).first->second );
+
+					auto insertResult { voxels.insert ( { position, { *this, { position, voxelType } } } ) };
+
+					if ( x == min.x || x == max.x || y == min.y || y == max.y || z == min.z || z == max.z )
+						visibleVoxels.push_back ( &insertResult.first->second );
 				}
 			}
 		}
 
+		// TO DO: Update only affected voxels
 		UpdateAllVoxelNeighbours ();
 
-		UpdateRenderList ();
+		std::vector <std::pair <Voxel *, VoxelData>> voxelDatas;
+		voxelDatas.reserve ( visibleVoxels.size () );
+
+		for ( auto voxel : visibleVoxels )
+			voxelDatas.push_back ( { voxel, { voxel->GetTransformMatrix () } } );
+
+		typeVoxelBuffers[voxelType].Insert (voxelDatas);
 	}
 
-	void VoxelWorld::RemoveVoxels ( std::vector <Voxel *> const & voxels )
+	void VoxelWorld::RemoveVoxel ( Voxel * voxel )
 	{
-		std::vector <Voxel *> neighbours;
-		neighbours.reserve ( voxels.size () * 6 );
+		auto voxelType { voxel->GetType () };
+		auto neighbours { voxel->GetNeighbours () };
+			
+		this->voxels.erase ( voxel->GetPosition () );
+			
+		if ( voxel == raycaster.GetTargetVoxel () )
+			raycaster.Clear ();
+		
+		for ( auto & neighbour : neighbours )
+				UpdateVoxelNeighbours ( *neighbour );
+		
+		typeVoxelBuffers[voxelType].Erase ( { voxel } );
 
-		for ( auto const & voxel : voxels )
-		{
-			auto voxelNeighbours { voxel->GetNeighbours () };
-			neighbours.insert ( neighbours.end (), voxelNeighbours.begin (), voxelNeighbours.end () );
-			
-			this->voxels.erase ( voxel->GetPosition () );
-			
-			if ( voxel == raycaster.GetTargetVoxel () )
-				raycaster.Clear ();
-		}
-		
-		for ( auto & voxel : neighbours )
-				UpdateVoxelNeighbours ( *voxel );
-		
-		UpdateRenderList ();
+		for ( auto neighbour : neighbours )
+			if ( neighbour->GetNeighbours ().size () == 5 )
+				typeVoxelBuffers [ neighbour->GetType () ].Insert ( { { neighbour, { neighbour->GetTransformMatrix () } } });
 	}
 
 	void VoxelWorld::Update ( float deltaTime )
@@ -91,22 +105,25 @@ namespace vw
 		camera.Bind ( shaderProgram );
 		voxelMesh.Bind ();
 
-		// Bind transform buffer
-		glBindBufferBase ( GL_UNIFORM_BUFFER, 0, voxelBuffer.GetBuffer () );
+		for ( auto const & [type, voxelBuffer] : typeVoxelBuffers )
+		{
+			// Bind transform buffer
+			glBindBufferBase ( GL_UNIFORM_BUFFER, 0, voxelBuffer.GetValueBuffer ().GetBuffer () );
 
-		auto texture { application->voxelTypeTextures.at ( "Grass" ) };
+			auto texture { application->voxelTypeTextures.at ( type ) };
 
-		glActiveTexture ( GL_TEXTURE0 );
-		glBindTexture ( GL_TEXTURE_2D, texture );
-		shaderProgram.SetUniform ( "u_texture", 0 );
+			glActiveTexture ( GL_TEXTURE0 );
+			glBindTexture ( GL_TEXTURE_2D, texture );
+			shaderProgram.SetUniform ( "u_texture", 0 );
 
-		glDrawElementsInstanced (
-			GL_TRIANGLES,
-			6 * 6,
-			GL_UNSIGNED_INT,
-			0,
-			voxelBuffer.GetElementCount ()
-		);
+			glDrawElementsInstanced (
+				GL_TRIANGLES,
+				6 * 6,
+				GL_UNSIGNED_INT,
+				0,
+				voxelBuffer.GetElementCount ()
+			);
+		}
 
 		// Render outline
 		{
@@ -136,20 +153,20 @@ namespace vw
 
 	void VoxelWorld::UpdateRenderList ()
 	{
-		std::vector <VoxelData> voxelDatas;
+		//std::vector <VoxelData> voxelDatas;
 
-		voxelDatas.reserve ( voxels.size () );
+		//voxelDatas.reserve ( voxels.size () );
 
-		for ( auto const & [position, voxel] : voxels )
-		{
-			if ( voxel.GetNeighbours ().size () == 6 )
-				continue;
+		//for ( auto const & [position, voxel] : voxels )
+		//{
+		//	if ( voxel.GetNeighbours ().size () == 6 )
+		//		continue;
 
-			voxelDatas.push_back ( { voxel.GetTransformMatrix () } );
-		}
+		//	voxelDatas.push_back ( { voxel.GetTransformMatrix () } );
+		//}
 
-		voxelBuffer.Clear ();
-		voxelBuffer.PushBack ( voxelDatas );
+		//voxelBuffer.Clear ();
+		//voxelBuffer.PushBack ( voxelDatas );
 	}
 
 	void VoxelWorld::RenderVoxelOutline ( glm::mat4 const & transform )

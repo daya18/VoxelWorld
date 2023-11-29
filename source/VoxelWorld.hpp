@@ -4,6 +4,7 @@
 #include "Camera.hpp"
 #include "VoxelWorldRaycaster.hpp"
 #include "opengl/VectorBuffer.hpp"
+#include "opengl/MapBuffer.hpp"
 #include "opengl/Shader.hpp"
 #include "Mesh.hpp"
 
@@ -19,7 +20,7 @@ namespace vw
 
 		void AddVoxel ( glm::vec3 const & position, std::string const & type );
 		void Fill ( glm::vec3 const & from, glm::vec3 const & to, std::string const & voxelType );
-		void RemoveVoxels ( std::vector <Voxel *> const & voxels );
+		void RemoveVoxel ( Voxel * voxel );
 
 		Voxel * FindVoxel ( glm::vec3 const & position );
 
@@ -44,7 +45,7 @@ namespace vw
 		void UpdateVoxelNeighbours ( Voxel & );
 		void UpdateRenderList ();
 		void RenderVoxelOutline ( glm::mat4 const & transform );
-
+		
 		float voxelScale = 1.0f;
 
 		Application * application;
@@ -58,7 +59,7 @@ namespace vw
 		Mesh voxelOutlineMesh;
 		Shader shaderProgram;
 		Shader simpleShaderProgram;
-		VectorBuffer <VoxelData> voxelBuffer;
+		std::unordered_map <std::string, MapBuffer <Voxel *, VoxelData>> typeVoxelBuffers;
 
 		friend class Voxel;
 		friend class VoxelWorldRaycaster;

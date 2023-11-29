@@ -74,4 +74,9 @@ namespace vw
 		return neighbours;
 	}
 
+	bool Voxel::CheckVisible () const
+	{
+		return neighbours [ 0 ] || neighbours [ 1 ] || neighbours [ 2 ] || neighbours [ 3 ] || neighbours [ 4 ] || neighbours [ 5 ];
+	}
+
 }

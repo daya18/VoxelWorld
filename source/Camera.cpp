@@ -5,7 +5,7 @@
 
 namespace vw
 {
-	float Camera::moveSensitivity { 1.5f };
+	float Camera::moveSensitivity { 3.0f };
 	float Camera::rotateSensitivity { 9.0f };
 
 	Camera::Camera ( Window & window )

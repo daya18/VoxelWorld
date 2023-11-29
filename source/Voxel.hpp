@@ -25,6 +25,7 @@ namespace vw
 		glm::mat4 const & GetTransformMatrix () const;
 		bool CheckCameraRayIntersection ( float & distance, Sides & hitSide ) const;
 		std::vector <Voxel *> GetNeighbours () const;
+		bool CheckVisible () const;
 
 	private:
 		void ClearNeighbours ();
