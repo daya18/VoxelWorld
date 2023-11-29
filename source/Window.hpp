@@ -1,10 +1,8 @@
 #pragma once
 
-#include "SignalEmitter.hpp"
-
 namespace vw
 {
-	class Window : public SignalEmitter
+	class Window
 	{
 	public:
 		using KeyCallback = std::function <void ( int )>;

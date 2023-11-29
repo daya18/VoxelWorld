@@ -74,13 +74,11 @@ namespace vw
 	void Camera::UpdateViewMatrix ()
 	{
 		viewMatrix = glm::lookAt ( position, position + lookDirection, { 0.0f, 1.0f, 0.0f } );
-		EmitSignal ( "ViewUpdate" );
 	}
 
 	void Camera::UpdateProjectionMatrix ()
 	{
 		glm::vec2 windowSize { window->GetSize () };
 		projectionMatrix = glm::perspective ( 45.0f, windowSize.x / windowSize.y, 0.001f, 100.0f );
-		EmitSignal ( "ProjectionUpdate" );
 	}
 }

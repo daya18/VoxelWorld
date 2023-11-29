@@ -47,7 +47,7 @@ target_sources ( VoxelWorld PRIVATE
 	
 	"source/RenderContext.cpp" 
 	"source/VoxelWorld.cpp" 
-	"source/SignalEmitter.cpp"
+	
 	"source/Camera.cpp"  
 	
 	"source/Voxel.cpp"

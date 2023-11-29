@@ -1,13 +1,12 @@
 #pragma once
 
-#include "SignalEmitter.hpp"
 
 namespace vw
 {
 	class Window;
 	class Shader;
 
-	class Camera : public SignalEmitter
+	class Camera
 	{
 	public:
 		Camera ( Window & );
