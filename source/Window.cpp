@@ -18,6 +18,7 @@ namespace vw
 		glfwSetCursorEnterCallback ( window, mouseEnterCallback );
 		glfwSetCursorPosCallback ( window, mouseMoveCallback );
 		glfwSetFramebufferSizeCallback ( window, framebufferResizeCallback );
+		glfwSetScrollCallback ( window, scrollCallback );
 		glfwSetKeyCallback ( window, keyCallback );
 
 		++instanceCount;
@@ -94,6 +95,13 @@ namespace vw
 	{
 	}
 
+	void Window::scrollCallback ( GLFWwindow * glfwWindow, double xoffset, double yoffset )
+	{
+		auto & window { *GetWindow ( glfwWindow ) };
+		glm::vec2 delta { static_cast < float > ( xoffset ), static_cast < float > ( yoffset ) };
+		Invoke ( window.scrollCallbacks, delta );
+	}
+	
 	bool Window::GetKey ( int key )
 	{
 		return glfwGetKey ( window, key );
@@ -129,4 +137,6 @@ namespace vw
 	{
 		ImGui_ImplGlfw_InitForOpenGL ( window, true );
 	}
+
+
 }

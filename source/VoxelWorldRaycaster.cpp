@@ -15,7 +15,7 @@ namespace vw
 
 	void VoxelWorldRaycaster::Update ()
 	{
-		auto voxelsWithinReach { GetVoxelsWithinReach () };
+		auto voxelsWithinReach { world->GetVoxels ( glm::round ( world->camera->GetPosition () ), rayLength ) };
 
 		bool intersects { false };
 		float minIntersectionDistance { std::numeric_limits <float>::max () };
@@ -41,27 +41,6 @@ namespace vw
 
 		targetVoxel = intersectingVoxel;
 		targetVoxelSide = minIntersectionSide;
-	}
-
-	std::vector <Voxel *> VoxelWorldRaycaster::GetVoxelsWithinReach () const
-	{
-		return world->GetVoxels ( glm::round ( world->camera.GetPosition () ), rayLength );
-
-		std::vector <Voxel *> voxels;
-		voxels.reserve ( world->voxels.size () );
-
-		auto cameraPosition { glm::round ( world->camera.GetPosition () ) };
-
-		//for ( auto & [voxelPosition, voxel] : world->voxels )
-		//{
-		//	auto cameraVoxelDistance { glm::distance ( world->camera.GetPosition (), voxel.GetPosition () ) };
-
-		//	if ( cameraVoxelDistance < rayLength )
-		//		voxels.push_back ( & voxel );
-		//}
-
-		voxels.shrink_to_fit ();
-		return voxels;
 	}
 
 	void VoxelWorldRaycaster::Clear ()

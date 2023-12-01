@@ -19,8 +19,6 @@ namespace vw
 		void Clear ();
 
 	private:
-		std::vector <Voxel *> GetVoxelsWithinReach () const;
-
 		static const float rayLength;
 
 		Application const * application;

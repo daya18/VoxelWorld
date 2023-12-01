@@ -7,9 +7,12 @@ namespace vw
 	World::World ( Application & application )
 	: 
 		application ( &application ),
+		camera ( application.GetWindow () ),
 		voxelWorld ( application ),
 		player ( *this )
 	{
+		voxelWorld.SetCamera ( camera );
+
 		voxelWorld.Fill ( { -20, -20, -20 }, { 20, 0, 20 }, "Grass" );
 		//voxelWorld.Fill ( { -5, -5, -5 }, { 5, 0, 5 }, "Grass" );
 
@@ -29,20 +32,34 @@ namespace vw
 		player.Update ( delta );
 	}
 
+	void World::FixedUpdate ()
+	{
+		if ( ! application->CheckPaused () )
+			camera.FixedUpdate ();
+	}
+
 	void World::Render ()
 	{
 		voxelWorld.Render ();
-		RenderGUI ();
-		player.Render ();
+		RenderImGuiLayer ();
 	}
 
-	void World::RenderGUI ()
+	void World::RenderImGuiLayer ()
 	{
 		ImGui::SetNextWindowPos ( { 0, 0 } );
 		ImGui::SetNextWindowSize ( ImGui::GetIO ().DisplaySize );
-		ImGui::Begin ( "GUI Panel", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration );
+		
+		ImGui::Begin ( "GUI Panel", nullptr, ImGuiWindowFlags_NoBackground 
+			| ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus );
+		
 		DrawCrosshair ();
+		
 		ImGui::End ();
+	}
+
+	void World::RenderGUI ( GUIRenderer & renderer )
+	{
+		player.RenderGUI ( renderer );
 	}
 
 	void World::DrawCrosshair ()

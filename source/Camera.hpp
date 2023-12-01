@@ -17,7 +17,7 @@ namespace vw
 		glm::vec3 const & GetPosition () const;
 		glm::vec3 GetTargetDirection () const;
 
-		void Update ( float deltaTime );
+		void FixedUpdate ();
 		void Bind ( Shader & );
 
 	private:
@@ -26,10 +26,10 @@ namespace vw
 
 		void Rotate ( glm::vec3 normal, float angle );
 		void Move ( glm::vec3 const & );
-		void HandleKeyPress ( int key );
-		void HandleKeyRelease ( int key );
+		
 		void UpdateViewMatrix ();
 		void UpdateProjectionMatrix ();
+
 		glm::vec3 GetRight () const;
 		glm::vec3 GetForward () const;
 

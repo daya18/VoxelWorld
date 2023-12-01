@@ -23,15 +23,10 @@ namespace vw
 		eiBox.max = { max.x, max.y, max.z };
 	}
 
-	bool Voxel::CheckNeighbour ( Sides side ) const
-	{
-		return neighbours [ static_cast < int > ( side ) ] != nullptr;
-	}
-
 	bool Voxel::CheckCameraRayIntersection ( float & distance, Sides & hitSide ) const
 	{
-		glm::vec3 cameraPos { world->camera.GetPosition () };
-		glm::vec3 cameraDir { world->camera.GetTargetDirection () };
+		glm::vec3 cameraPos { world->camera->GetPosition () };
+		glm::vec3 cameraDir { world->camera->GetTargetDirection () };
 
 		ei::Ray ray ( { cameraPos.x, cameraPos.y, cameraPos.z }, { cameraDir.x, cameraDir.y, cameraDir.z } );
 
@@ -51,17 +46,6 @@ namespace vw
 		return intersects;
 	}
 
-	void Voxel::ClearNeighbours ()
-	{
-		for ( auto & neighbour : neighbours )
-			neighbour = nullptr;
-	}
-
-	void Voxel::SetNeighbour ( Sides side, Voxel & neighbour )
-	{
-		neighbours [ static_cast < int > ( side ) ] = &neighbour;
-	}
-
 	std::vector <Voxel *> Voxel::GetNeighbours () const
 	{
 		std::vector <Voxel *> neighbours;
@@ -74,9 +58,25 @@ namespace vw
 		return neighbours;
 	}
 
+	bool Voxel::CheckNeighbour ( Sides side ) const
+	{
+		return neighbours [ static_cast < int > ( side ) ] != nullptr;
+	}
+
 	bool Voxel::CheckVisible () const
 	{
 		return neighbours [ 0 ] || neighbours [ 1 ] || neighbours [ 2 ] || neighbours [ 3 ] || neighbours [ 4 ] || neighbours [ 5 ];
 	}
-
+	
+	void Voxel::FindNeighbours ()
+	{
+		neighbours = {
+			world->FindVoxel ( GetPosition () + GetDirectionVector ( Sides::up ) ),
+			world->FindVoxel ( GetPosition () + GetDirectionVector ( Sides::down ) ),
+			world->FindVoxel ( GetPosition () + GetDirectionVector ( Sides::left ) ),
+			world->FindVoxel ( GetPosition () + GetDirectionVector ( Sides::right ) ),
+			world->FindVoxel ( GetPosition () + GetDirectionVector ( Sides::forward ) ),
+			world->FindVoxel ( GetPosition () + GetDirectionVector ( Sides::back ) ),
+		};
+	}
 }

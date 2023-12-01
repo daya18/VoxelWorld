@@ -10,14 +10,24 @@ namespace vw
 		renderContext ( window ),
 
 		voxelTypeTextures {
-			{ "Grass", CreateTextureFromFile ( "image/Grass.png" ) },
-			{ "Dirt", CreateTextureFromFile ( "image/Dirt.png" ) },
-			{ "Stone", CreateTextureFromFile ( "image/Stone.png" ) },
-			{ "Log", CreateTextureFromFile ( "image/Log.png" ) },
-			{ "Plank", CreateTextureFromFile ( "image/Plank.png" ) }
+			{ "Grass", CreateTextureFromFile ( "image/blocks/Grass.png" ) },
+			{ "Dirt", CreateTextureFromFile  ( "image/blocks/Dirt.png" ) },
+			{ "Stone", CreateTextureFromFile ( "image/blocks/Stone.png" ) },
+			{ "Log", CreateTextureFromFile   ( "image/blocks/Log.png" ) },
+			{ "Plank", CreateTextureFromFile ( "image/blocks/Plank.png" ) }
 		},
 
-		world ( *this )
+		voxelTypeItemTextures {
+			{ "Grass", CreateTextureFromFile ( "image/items/Grass.png" ) },
+			{ "Dirt", CreateTextureFromFile  ( "image/items/Dirt.png" ) },
+			{ "Stone", CreateTextureFromFile ( "image/items/Stone.png" ) },
+			{ "Log", CreateTextureFromFile   ( "image/items/Log.png" ) },
+			{ "Plank", CreateTextureFromFile ( "image/items/Plank.png" ) }
+		},
+		
+		whiteTexture ( CreateTextureFromFile ( "image/White.png" ) ),
+		world ( *this ),
+		guiRenderer ( *this, window )
 	{
 		SetPaused ( false );
 
@@ -30,13 +40,23 @@ namespace vw
 
 	Application::~Application ()
 	{
-		auto textures { GetValues <GLuint> ( voxelTypeTextures ) };
-		glDeleteTextures ( static_cast <GLsizei> ( textures.size () ), textures.data () );
+		{
+			auto textures { GetValues <GLuint> ( voxelTypeTextures ) };
+			glDeleteTextures ( static_cast <GLsizei> ( textures.size () ), textures.data () );
+		}
+
+		{
+			auto textures { GetValues <GLuint> ( voxelTypeItemTextures ) };
+			glDeleteTextures ( static_cast < GLsizei > ( textures.size () ), textures.data () );
+		}
+
+		glDeleteTextures ( 1, &whiteTexture );
 	}
 
 	void Application::Run ()
 	{
 		lastFrameTime = std::chrono::steady_clock::now ();
+		lastFixedUpdateTime = std::chrono::steady_clock::now ();
 
 		while ( ! quit )
 		{
@@ -55,49 +75,87 @@ namespace vw
 			}
 
 			Update ( deltaTime );
+			
+			{
+				auto timeSincelastFixedUpdate { std::chrono::steady_clock::now () - lastFixedUpdateTime };
+				auto timeSinceLastFixedUpdateMs { std::chrono::duration_cast < std::chrono::milliseconds > ( timeSincelastFixedUpdate ) };
+
+				if ( timeSinceLastFixedUpdateMs.count () >= fixedUpdateIntervalMs )
+				{
+					FixedUpdate ();
+					lastFixedUpdateTime = std::chrono::steady_clock::now ();
+				}
+			}
+
+			renderContext.Begin ();
 			Render ();
+			RenderGUI ();
+			renderContext.End ();
 		}
 	}
 
 	void Application::Update ( float deltaTime )
 	{
 		window.HandleInput ();
-		
-		if ( paused ) 
-			return;
-
 		world.Update ( deltaTime );
+	}
+	
+	void Application::FixedUpdate ()
+	{
+		world.FixedUpdate ();
 	}
 
 	void Application::Render ()
 	{
-		renderContext.Begin ();
-		
 		world.Render ();
-		
+
 		ImGui::ShowMetricsWindow ();
-
+		
 		if ( paused )
-		{
-			ImGui::Begin ("Pause Menu", nullptr, ImGuiWindowFlags_AlwaysAutoResize );
-			
-			ImVec2 buttonSize { 150.0f, 50.0f };
+			RenderPauseMenu ();
+	}
+	
+	void Application::RenderGUI ()
+	{
+		world.RenderGUI ( guiRenderer );
+	}
 
-			if ( ImGui::Button ( "Resume", buttonSize ) )
-				SetPaused ( false );
+	void Application::RenderPauseMenu ()
+	{
+		auto flags { ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove };
+		ImGui::Begin ( "Pause Menu", nullptr, flags );
 
-			if ( ImGui::Button ( "Quit", buttonSize ) )
-				quit = true;
+		ImVec2 buttonSize { 150.0f, 50.0f };
 
-			ImGui::End ();
-		}
+		if ( ImGui::Button ( "Resume", buttonSize ) )
+			SetPaused ( false );
 
-		renderContext.End ();
+		if ( ImGui::Button ( "Quit", buttonSize ) )
+			quit = true;
+
+		ImGui::SetWindowPos ( ( ImGui::GetIO ().DisplaySize - ImGui::GetWindowSize () ) * 0.5f );
+
+		ImGui::End ();
 	}
 
 	void Application::SetPaused ( bool paused )
 	{
 		this->paused = paused;
 		window.SetRawMouseInput ( !paused );
+	}
+
+	GLuint Application::GetVoxelTexture ( std::string const & type ) const
+	{
+		return voxelTypeTextures.at ( type );
+	}
+
+	GLuint Application::GetItemTexture ( std::string const & type ) const
+	{
+		return voxelTypeItemTextures.at ( type );
+	}
+
+	GLuint Application::GetWhiteTexture () const
+	{
+		return whiteTexture;
 	}
 }

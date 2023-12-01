@@ -10,7 +10,6 @@ namespace vw
 	: 
 		application ( &application ),
 		window ( & application.window ),
-		camera ( *window ),
 		raycaster ( application, *this ),
 		voxelMesh ( "model/Voxel.obj", glm::scale ( glm::identity <glm::mat4> (), { 0.5f, 0.5f, 0.5f } ) ),
 		voxelOutlineMesh ( "model/Voxel.obj", glm::scale ( glm::identity <glm::mat4> (), { 0.5f, 0.5f, 0.5f } ), "Outline" ),
@@ -23,10 +22,10 @@ namespace vw
 	{
 		auto & voxel { voxels.insert ( { position, { *this, { position, type } } } ).first->second };
 		
-		UpdateVoxelNeighbours ( voxel );
+		voxel.FindNeighbours ();
 
 		for ( auto neighbour : voxel.GetNeighbours () )
-			UpdateVoxelNeighbours ( *neighbour );
+			neighbour->FindNeighbours ();
 
 		typeVoxelBuffers[type].Insert ({ { &voxel, { voxel.GetTransformMatrix () } } });
 
@@ -62,7 +61,8 @@ namespace vw
 		}
 
 		// TO DO: Update only affected voxels
-		UpdateAllVoxelNeighbours ();
+		for ( auto & [position, voxel] : voxels )
+			voxel.FindNeighbours ();
 
 		std::vector <std::pair <Voxel *, VoxelData>> voxelDatas;
 		voxelDatas.reserve ( visibleVoxels.size () );
@@ -84,7 +84,7 @@ namespace vw
 			raycaster.Clear ();
 		
 		for ( auto & neighbour : neighbours )
-				UpdateVoxelNeighbours ( *neighbour );
+			neighbour->FindNeighbours ();
 		
 		typeVoxelBuffers[voxelType].Erase ( { voxel } );
 
@@ -93,16 +93,29 @@ namespace vw
 				typeVoxelBuffers [ neighbour->GetType () ].Insert ( { { neighbour, { neighbour->GetTransformMatrix () } } });
 	}
 
+	void VoxelWorld::SetCamera ( Camera & camera )
+	{
+		this->camera = &camera;
+	}
+
 	void VoxelWorld::Update ( float deltaTime )
 	{
-		camera.Update ( deltaTime );
-		raycaster.Update ();
+		if ( ! application->CheckPaused () )
+		{
+			raycaster.Update ();
+		}
 	}
 
 	void VoxelWorld::Render ()
 	{
+		glEnable ( GL_DEPTH_TEST );
+
+		glEnable ( GL_CULL_FACE );
+		glCullFace ( GL_BACK );
+		glFrontFace ( GL_CCW );
+
 		shaderProgram.Use ();
-		camera.Bind ( shaderProgram );
+		camera->Bind ( shaderProgram );
 		voxelMesh.Bind ();
 
 		for ( auto const & [type, voxelBuffer] : typeVoxelBuffers )
@@ -131,49 +144,16 @@ namespace vw
 			if ( targetVoxel != nullptr )
 				RenderVoxelOutline ( targetVoxel->GetTransformMatrix () );
 		}
+
+		glDisable ( GL_CULL_FACE );
+		glDisable ( GL_DEPTH_TEST );
 	}
 	
-	void VoxelWorld::UpdateAllVoxelNeighbours ()
-	{
-		for ( auto & [position, voxel] : voxels )
-			UpdateVoxelNeighbours ( voxel );
-	}
-
-	void VoxelWorld::UpdateVoxelNeighbours ( Voxel & voxel )
-	{
-		voxel.neighbours = {
-			FindVoxel ( voxel.GetPosition () + GetDirectionVector ( Sides::up ) ),
-			FindVoxel ( voxel.GetPosition () + GetDirectionVector ( Sides::down ) ),
-			FindVoxel ( voxel.GetPosition () + GetDirectionVector ( Sides::left ) ),
-			FindVoxel ( voxel.GetPosition () + GetDirectionVector ( Sides::right ) ),
-			FindVoxel ( voxel.GetPosition () + GetDirectionVector ( Sides::forward ) ),
-			FindVoxel ( voxel.GetPosition () + GetDirectionVector ( Sides::back ) ),
-		};
-	}
-
-	void VoxelWorld::UpdateRenderList ()
-	{
-		//std::vector <VoxelData> voxelDatas;
-
-		//voxelDatas.reserve ( voxels.size () );
-
-		//for ( auto const & [position, voxel] : voxels )
-		//{
-		//	if ( voxel.GetNeighbours ().size () == 6 )
-		//		continue;
-
-		//	voxelDatas.push_back ( { voxel.GetTransformMatrix () } );
-		//}
-
-		//voxelBuffer.Clear ();
-		//voxelBuffer.PushBack ( voxelDatas );
-	}
-
 	void VoxelWorld::RenderVoxelOutline ( glm::mat4 const & transform )
 	{
 		simpleShaderProgram.Use ();
 
-		camera.Bind ( simpleShaderProgram );
+		camera->Bind ( simpleShaderProgram );
 
 		voxelOutlineMesh.Bind ();
 

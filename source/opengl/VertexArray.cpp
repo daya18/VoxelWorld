@@ -12,7 +12,7 @@ namespace vw::gl
 	VertexArray::VertexArray ( std::vector <Attribute> const & attributes )
 		: VertexArray ()
 	{
-
+		SetAttributes ( attributes );
 	}
 
 	VertexArray::~VertexArray ()

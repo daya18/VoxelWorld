@@ -7,6 +7,7 @@ namespace vw::gl
 	public:
 		Buffer ();
 		Buffer ( void const * data, unsigned int size );
+		template <class Type> Buffer ( std::vector <Type> const & data );
 		Buffer ( Buffer const & );
 		Buffer ( Buffer && ) noexcept;
 		~Buffer ();
@@ -15,6 +16,7 @@ namespace vw::gl
 		Buffer & operator = ( Buffer && ) noexcept;
 
 		void SetData ( void const * data, unsigned int size );
+		template <class Type> void SetData ( std::vector <Type> const & data );
 
 		GLuint GetBuffer () const;
 		unsigned int GetSize () const;
@@ -23,4 +25,18 @@ namespace vw::gl
 		GLuint buffer		{ 0 };
 		unsigned int size	{ 0 };
 	};
+
+
+
+	// Implementation
+	template <class Type> Buffer::Buffer ( std::vector <Type> const & data )
+		: Buffer ()
+	{
+		SetData ( data );
+	}
+
+	template <class Type> void Buffer::SetData ( std::vector <Type> const & data )
+	{
+		SetData ( data.data (), data.size () * sizeof ( Type ) );
+	}
 }

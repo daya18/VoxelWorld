@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Voxel.hpp"
-#include "Camera.hpp"
 #include "VoxelWorldRaycaster.hpp"
 #include "opengl/VectorBuffer.hpp"
 #include "opengl/MapBuffer.hpp"
@@ -12,6 +11,7 @@ namespace vw
 {
 	class Application;
 	class Window;
+	class Camera;
 
 	class VoxelWorld
 	{
@@ -23,6 +23,8 @@ namespace vw
 		void RemoveVoxel ( Voxel * voxel );
 
 		Voxel * FindVoxel ( glm::vec3 const & position );
+
+		void SetCamera ( Camera & );
 
 		void Update ( float deltaTime );
 		void Render ();
@@ -41,16 +43,13 @@ namespace vw
 			glm::mat4 transform;
 		};
 
-		void UpdateAllVoxelNeighbours ();
-		void UpdateVoxelNeighbours ( Voxel & );
-		void UpdateRenderList ();
 		void RenderVoxelOutline ( glm::mat4 const & transform );
 		
 		float voxelScale = 1.0f;
 
 		Application * application;
 		Window * window;
-		Camera camera;
+		Camera * camera;
 		std::unordered_map <glm::vec3, Voxel> voxels;
 
 		VoxelWorldRaycaster raycaster;

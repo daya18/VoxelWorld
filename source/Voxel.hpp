@@ -20,16 +20,15 @@ namespace vw
 	
 		glm::vec3 const & GetPosition () const;
 		std::string const & GetType () const;
-		bool CheckNeighbour ( Sides ) const;
 		glm::mat4 const & GetTransformMatrix () const;
 		bool CheckCameraRayIntersection ( float & distance, Sides & hitSide ) const;
+		
+		bool CheckNeighbour ( Sides ) const;
 		std::vector <Voxel *> GetNeighbours () const;
 		bool CheckVisible () const;
+		void FindNeighbours ();
 
 	private:
-		void ClearNeighbours ();
-		void SetNeighbour ( Sides, Voxel & );
-
 		VoxelWorld * world;
 		glm::vec3 position;
 		std::string type;
